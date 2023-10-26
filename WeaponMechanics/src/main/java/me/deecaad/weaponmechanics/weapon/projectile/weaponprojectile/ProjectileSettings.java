@@ -5,6 +5,7 @@ import me.deecaad.core.file.Serializer;
 import me.deecaad.core.file.SerializerException;
 import me.deecaad.core.file.serializers.ItemSerializer;
 import me.deecaad.core.utils.ReflectionUtil;
+import me.deecaad.weaponmechanics.utils.NumberHelper;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -18,21 +19,25 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
     private EntityType projectileDisguise;
     private Object disguiseData;
 
-    private double gravity;
-
+    private Number gravity;
+    private Number gravityDelayTicks;
+    private Number dragDelayTicks;
     private boolean removeAtMinimumSpeed;
-    private double minimumSpeed;
+    private Number minimumSpeed;
     private boolean removeAtMaximumSpeed;
-    private double maximumSpeed;
+    private Number maximumSpeed;
 
-    private double decrease;
-    private double decreaseInWater;
-    private double decreaseWhenRainingOrSnowing;
+    private Number decrease;
+    private Number decreaseInWater;
+    private Number decreaseWhenRainingOrSnowing;
 
     private boolean disableEntityCollisions;
-    private int maximumAliveTicks;
-    private double maximumTravelDistance;
-    private double size;
+    private boolean applyDragHorizontally;
+    private boolean maximizeYWhenDragIsHorizontal;
+    private boolean dragPositiveYWhenDragIsHorizontal;
+    private Number maximumAliveTicks;
+    private Number maximumTravelDistance;
+    private Number size;
 
     /**
      * Empty constructor to be used as serializer
@@ -40,10 +45,7 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
     public ProjectileSettings() {
     }
 
-    public ProjectileSettings(EntityType projectileDisguise, Object disguiseData, double gravity,
-                              boolean removeAtMinimumSpeed, double minimumSpeed, boolean removeAtMaximumSpeed, double maximumSpeed,
-                              double decrease, double decreaseInWater, double decreaseWhenRainingOrSnowing, boolean disableEntityCollisions,
-                              int maximumAliveTicks, double maximumTravelDistance, double size) {
+    public ProjectileSettings(EntityType projectileDisguise, Object disguiseData, Number gravity, boolean removeAtMinimumSpeed, Number minimumSpeed, boolean removeAtMaximumSpeed, Number maximumSpeed, Number decrease, Number decreaseInWater, Number decreaseWhenRainingOrSnowing, boolean disableEntityCollisions, Number maximumAliveTicks, Number maximumTravelDistance, Number size, Number gravityDelayTicks, Number dragDelayTicks, boolean applyDragHorizontally, boolean maximizeYWhenDragIsHorizontal, boolean dragPositiveYWhenDragIsHorizontal) {
         this.projectileDisguise = projectileDisguise;
         this.disguiseData = disguiseData;
         this.gravity = gravity;
@@ -57,7 +59,12 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
         this.disableEntityCollisions = disableEntityCollisions;
         this.maximumAliveTicks = maximumAliveTicks;
         this.maximumTravelDistance = maximumTravelDistance;
+        this.gravityDelayTicks = gravityDelayTicks;
+        this.dragDelayTicks = dragDelayTicks;
         this.size = size;
+        this.applyDragHorizontally = applyDragHorizontally;
+        this.maximizeYWhenDragIsHorizontal = maximizeYWhenDragIsHorizontal;
+        this.dragPositiveYWhenDragIsHorizontal = dragPositiveYWhenDragIsHorizontal;
     }
 
     /**
@@ -93,7 +100,7 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
      * @return gravity of projectile
      */
     public double getGravity() {
-        return gravity;
+        return gravity.doubleValue();
     }
 
     public void setGravity(double gravity) {
@@ -104,13 +111,35 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
      * @return minimum speed of projectile
      */
     public double getMinimumSpeed() {
-        return minimumSpeed;
+        return minimumSpeed.doubleValue();
     }
 
     public void setMinimumSpeed(double minimumSpeed) {
         this.minimumSpeed = minimumSpeed;
     }
 
+    public boolean isYCappedOnHorizontalDrag() {
+        return this.maximizeYWhenDragIsHorizontal;
+    }
+
+    public void setYCappedOnHorizontalDrag(boolean yCappedOnHorizontalDrag) {
+        this.maximizeYWhenDragIsHorizontal = yCappedOnHorizontalDrag;
+    }
+    public boolean isPositiveYDraggedWhenDragIsHorizontal() {
+        return this.dragPositiveYWhenDragIsHorizontal;
+    }
+
+    public void setPositiveYDraggedWhenDragIsHorizontal(boolean dragPositiveYWhenDragIsHorizontal) {
+        this.dragPositiveYWhenDragIsHorizontal = dragPositiveYWhenDragIsHorizontal;
+    }
+
+    public boolean isDragHorizontal() {
+        return this.applyDragHorizontally;
+    }
+
+    public void setDragHorizontal(boolean applyDragHorizontally) {
+        this.applyDragHorizontally = applyDragHorizontally;
+    }
     /**
      * @return whether to remove projectile when minimum speed is reached
      */
@@ -122,11 +151,27 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
         this.removeAtMinimumSpeed = removeAtMinimumSpeed;
     }
 
+    public int getGravityDelayTicks() {
+        return this.gravityDelayTicks.intValue();
+    }
+
+    public void setGravityDelayTicks(int gravityDelayTicks) {
+        this.gravityDelayTicks = gravityDelayTicks;
+    }
+
+    public int getDragDelayTicks() {
+        return this.dragDelayTicks.intValue();
+    }
+
+    public void setDragDelayTicks(int dragDelayTicks) {
+        this.dragDelayTicks = dragDelayTicks;
+    }
+
     /**
      * @return maximum speed of projectile
      */
     public double getMaximumSpeed() {
-        return maximumSpeed;
+        return maximumSpeed.doubleValue();
     }
 
     public void setMaximumSpeed(double maximumSpeed) {
@@ -148,7 +193,7 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
      * @return base speed decreasing
      */
     public double getDecrease() {
-        return decrease;
+        return decrease.doubleValue();
     }
 
     public void setDecrease(double decrease) {
@@ -159,7 +204,7 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
      * @return speed decreasing in water
      */
     public double getDecreaseInWater() {
-        return decreaseInWater;
+        return decreaseInWater.doubleValue();
     }
 
     public void setDecreaseInWater(double decreaseInWater) {
@@ -170,7 +215,7 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
      * @return speed decreasing when raining or snowing
      */
     public double getDecreaseWhenRainingOrSnowing() {
-        return decreaseWhenRainingOrSnowing;
+        return decreaseWhenRainingOrSnowing.doubleValue();
     }
 
     public void setDecreaseWhenRainingOrSnowing(double decreaseWhenRainingOrSnowing) {
@@ -192,7 +237,7 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
      * @return the maximum amount of ticks projectile can be alive
      */
     public int getMaximumAliveTicks() {
-        return maximumAliveTicks;
+        return maximumAliveTicks.intValue();
     }
 
     public void setMaximumAliveTicks(int maximumAliveTicks) {
@@ -203,7 +248,7 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
      * @return the maximum travel distance of projectile, -1 if not used
      */
     public double getMaximumTravelDistance() {
-        return maximumTravelDistance;
+        return maximumTravelDistance.intValue();
     }
 
     public void setMaximumTravelDistance(double maximumTravelDistance) {
@@ -214,7 +259,7 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
      * @return the projectile size, 0.1 if not used
      */
     public double getSize() {
-        return size;
+        return size.doubleValue();
     }
 
     public void setSize(double size) {
@@ -271,26 +316,24 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
             }
         }
 
-        double gravity = data.of("Gravity").getDouble(10) / 200.0;
-
-        // -1 so that CustomProjectile#tick() can understand that minimum or maximum speed isn't used
-        double minimumSpeed = data.of("Minimum.Speed").assertPositive().getDouble(-20.0) / 20.0;
+        Number gravity = NumberHelper.divideBy(data.of("Gravity").getNumber(10.0), 200.0);
+        Number minimumSpeed = NumberHelper.divideBy(data.of("Minimum.Speed").assertPositive().getNumber(-20.0), 20.0);
         boolean removeAtMinimumSpeed = data.of("Minimum.Remove_Projectile_On_Speed_Reached").getBool(false);
-        double maximumSpeed = data.of("Maximum.Speed").assertPositive().getDouble(-20.0) / 20.0;
+        Number maximumSpeed = NumberHelper.divideBy(data.of("Maximum.Speed").assertPositive().getNumber(-20.0), 20.0);
         boolean removeAtMaximumSpeed = data.of("Maximum.Remove_Projectile_On_Speed_Reached").getBool(false);
-
-        double decrease = data.of("Drag.Base").assertRange(0.0, 3.0).getDouble(0.99);
-        double decreaseInWater = data.of("Drag.In_Water").assertRange(0.0, 3.0).getDouble(0.96);
-        double decreaseWhenRainingOrSnowing = data.of("Drag.When_Raining_Or_Snowing").assertRange(0.0, 3.0).getDouble(0.98);
-
+        Number decrease = data.of("Drag.Base").assertRange(0.0, 3.0).getNumber(0.99);
+        Number decreaseInWater = data.of("Drag.In_Water").assertRange(0.0, 3.0).getNumber(0.96);
+        Number decreaseWhenRainingOrSnowing = data.of("Drag.When_Raining_Or_Snowing").getNumber(0.98);
         boolean disableEntityCollisions = data.of("Disable_Entity_Collisions").getBool(false);
-        int maximumAliveTicks = data.of("Maximum_Alive_Ticks").assertPositive().getInt(600);
-        double maximumTravelDistance = data.of("Maximum_Travel_Distance").assertPositive().getDouble(-1);
-        double size = data.of("Size").assertPositive().getDouble(0.1);
-
-        return new ProjectileSettings(projectileType, disguiseData, gravity, removeAtMinimumSpeed, minimumSpeed,
-                removeAtMaximumSpeed, maximumSpeed, decrease, decreaseInWater, decreaseWhenRainingOrSnowing,
-                disableEntityCollisions, maximumAliveTicks, maximumTravelDistance, size);
+        Number maximumAliveTicks = data.of("Maximum_Alive_Ticks").assertPositive().getNumber(600);
+        Number gravityDelayTicks = data.of("Gravity_Delay_Ticks").assertPositive().getNumber(0);
+        Number dragDelayTicks = data.of("Drag.Delay").assertPositive().getNumber(0);
+        Number maximumTravelDistance = data.of("Maximum_Travel_Distance").assertPositive().getNumber(-1.0);
+        Number size = data.of("Size").assertPositive().getNumber(0.1);
+        boolean applyDragHorizontally = data.of("Drag.OnlyHorizontally").getBool(false);
+        boolean maximizeYWhenDragIsHorizontal = data.of("Drag.ZeroYWhenHorizontal").getBool(false);
+        boolean dragPositiveYWhenDragIsHorizontal = data.of("Drag.DragPositiveYWhenHorizontal").getBool(true);
+        return new ProjectileSettings(projectileType, disguiseData, gravity, removeAtMinimumSpeed, minimumSpeed, removeAtMaximumSpeed, maximumSpeed, decrease, decreaseInWater, decreaseWhenRainingOrSnowing, disableEntityCollisions, maximumAliveTicks, maximumTravelDistance, size, gravityDelayTicks, dragDelayTicks, applyDragHorizontally, maximizeYWhenDragIsHorizontal, dragPositiveYWhenDragIsHorizontal);
     }
 
     @Override

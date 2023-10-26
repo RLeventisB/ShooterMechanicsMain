@@ -64,6 +64,7 @@ public class ProjectilesRunnable extends BukkitRunnable {
 
         if (projectile.isDead()) return;
 
+        projectile.onAdd();;
         if (Bukkit.getServer().isPrimaryThread()) {
             tickOnAdd(projectile);
             return;
@@ -82,9 +83,7 @@ public class ProjectilesRunnable extends BukkitRunnable {
     public void addProjectiles(Collection<? extends AProjectile> projectiles) {
         if (Bukkit.getServer().isPrimaryThread()) {
             for (AProjectile projectile : projectiles) {
-                if (projectile == null || projectile.isDead()) continue;
-
-                tickOnAdd(projectile);
+                addProjectile(projectile);
             }
             return;
         }

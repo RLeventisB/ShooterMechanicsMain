@@ -2,9 +2,6 @@ package me.deecaad.weaponmechanics;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import me.cjcrafter.auto.AutoMechanicsDownload;
-import me.cjcrafter.auto.UpdateChecker;
-import me.cjcrafter.auto.UpdateInfo;
 import me.deecaad.core.MechanicsCore;
 import me.deecaad.core.commands.MainCommand;
 import me.deecaad.core.compatibility.CompatibilityAPI;
@@ -47,29 +44,20 @@ import me.deecaad.weaponmechanics.weapon.stats.PlayerStat;
 import me.deecaad.weaponmechanics.weapon.stats.WeaponStat;
 import me.deecaad.weaponmechanics.wrappers.EntityWrapper;
 import me.deecaad.weaponmechanics.wrappers.PlayerWrapper;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bstats.bukkit.Metrics;
-import org.bstats.charts.SimplePie;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.error.YAMLException;
 
-import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -87,31 +75,23 @@ public class WeaponMechanics {
     Configuration basicConfiguration;
     MainCommand mainCommand;
     WeaponHandler weaponHandler;
-    UpdateChecker updateChecker;
     ProjectilesRunnable projectilesRunnable;
     ProtocolManager protocolManager;
-    Metrics metrics;
     Database database;
-
     // public so people can import a static variable
     public static Debugger debug;
-
     public WeaponMechanics(JavaPlugin javaPlugin) {
         this.javaPlugin = javaPlugin;
     }
-
     public org.bukkit.configuration.Configuration getConfig() {
         return javaPlugin.getConfig();
     }
-
     public Logger getLogger() {
         return javaPlugin.getLogger();
     }
-
     public File getDataFolder() {
         return javaPlugin.getDataFolder();
     }
-
     public ClassLoader getClassLoader() {
         return (ClassLoader) ReflectionUtil.invokeMethod(ReflectionUtil.getMethod(JavaPlugin.class, "getClassLoader"), javaPlugin);
     }
@@ -187,13 +167,11 @@ public class WeaponMechanics {
                 .thenRunSync(() -> {
                     loadConfig();
                     registerListeners();
-                    registerBStats();
                     registerPermissions();
                 });
 
 
         registerCommands();
-        registerUpdateChecker();
 
         long tookMillis = System.currentTimeMillis() - millisCurrent;
         double seconds = NumberUtil.getAsRounded(tookMillis * 0.001, 2);
@@ -258,17 +236,6 @@ public class WeaponMechanics {
                         String link = basicConfiguration.getString("Resource_Pack_Download.Link");
                         int connection = basicConfiguration.getInt("Resource_Pack_Download.Connection_Timeout");
                         int read = basicConfiguration.getInt("Resource_Pack_Download.Read_Timeout");
-
-                        if (("https://raw.githubusercontent.com/WeaponMechanics/MechanicsMain/master/WeaponMechanicsResourcePack.zip").equals(link)) {
-                            try {
-                                AutoMechanicsDownload auto = new AutoMechanicsDownload(10000, 30000);
-                                String version = auto.RESOURCE_PACK_VERSION;
-                                link = "https://raw.githubusercontent.com/WeaponMechanics/MechanicsMain/master/resourcepack/WeaponMechanicsResourcePack-" + version + ".zip";
-                            } catch (InternalError e) {
-                                debug.log(LogLevel.DEBUG, "Failed to fetch resource pack version due to timeout", e);
-                                return null;
-                            }
-                        }
 
                         File pack = new File(getDataFolder(), "WeaponMechanicsResourcePack.zip");
                         if (!pack.exists()) {
@@ -438,139 +405,6 @@ public class WeaponMechanics {
             permission.addParent(parent, true);
         }
     }
-
-    void registerUpdateChecker() {
-        if (!basicConfiguration.getBool("Update_Checker.Enable", true) || updateChecker != null) return;
-
-        debug.debug("Registering update checker");
-
-        updateChecker = new UpdateChecker(javaPlugin, UpdateChecker.spigot(99913, "WeaponMechanics"));
-
-        try {
-            UpdateInfo consoleUpdate = updateChecker.hasUpdate();
-            if (consoleUpdate != null) {
-                Audience audience = MechanicsCore.getPlugin().adventure.sender(Bukkit.getConsoleSender());
-                Component component = Component.text("WeaponMechanics is outdated! %s -> %s".formatted(consoleUpdate.current, consoleUpdate.newest), NamedTextColor.RED)
-                        .clickEvent(ClickEvent.openUrl("https://github.com/WeaponMechanics/MechanicsMain/releases/latest/download/WeaponMechanics.zip"))
-                        .hoverEvent(Component.text("Click to download", NamedTextColor.GRAY));
-
-                audience.sendMessage(component);
-            }
-        } catch (Throwable ex) {
-            debug.log(LogLevel.DEBUG, "UpdateChecker error", ex);
-            debug.error("UpdateChecker failed to connect: " + ex.getMessage());
-            return;
-        }
-
-        Listener listener = new Listener() {
-            @EventHandler
-            public void onJoin(PlayerJoinEvent event) {
-                if (event.getPlayer().isOp()) {
-                    new TaskChain(javaPlugin)
-                            .thenRunAsync((callback) -> {
-                                try {
-                                    return updateChecker.hasUpdate();
-                                } catch (Throwable ex) {
-                                    return null;
-                                }
-                            })
-                            .thenRunSync((callback) -> {
-                                UpdateInfo update = (UpdateInfo) callback;
-                                if (callback != null) {
-                                    Audience audience = MechanicsCore.getPlugin().adventure.player(event.getPlayer());
-                                    Component component = Component.text("WeaponMechanics is outdated! %s -> %s".formatted(update.current, update.newest), NamedTextColor.RED)
-                                            .clickEvent(ClickEvent.openUrl("https://github.com/WeaponMechanics/MechanicsMain/releases/latest/download/WeaponMechanics.zip"))
-                                            .hoverEvent(Component.text("Click to download", NamedTextColor.GRAY));
-
-                                    audience.sendMessage(component);
-                                }
-                                return null;
-                            });
-                }
-            }
-        };
-
-        Bukkit.getPluginManager().registerEvents(listener, javaPlugin);
-    }
-
-    void registerBStats() {
-        if (this.metrics != null) return;
-
-        debug.debug("Registering bStats");
-
-        // See https://bstats.org/plugin/bukkit/WeaponMechanics/14323. This is
-        // the bStats plugin id used to track information.
-        int id = 14323;
-
-        this.metrics = new Metrics((JavaPlugin) getPlugin(), id);
-
-        // Tracks the number of weapons that are used in the plugin. Since each
-        // server uses a relatively random number of weapons, we should track
-        // ranges of weapons (As in, <10, >10 & <20, >20 & <30, etc). This way,
-        // the pie chart will look tolerable.
-        // https://bstats.org/help/custom-charts
-        metrics.addCustomChart(new SimplePie("registered_weapons", () -> {
-            int weapons = getWeaponHandler().getInfoHandler().getSortedWeaponList().size();
-
-            if (weapons <= 10) {
-                return "0-10";
-            } else if (weapons <= 20) {
-                return "11-20";
-            } else if (weapons <= 30) {
-                return "21-30";
-            } else if (weapons <= 50) {
-                return "31-50";
-            } else if (weapons <= 100) {
-                return "51-100";
-            } else {
-                return ">100";
-            }
-        }));
-
-        metrics.addCustomChart(new SimplePie("custom_weapons", () -> {
-            Set<String> defaultWeapons = new HashSet<>(Arrays.asList("AK_47", "FN_FAL", "FR_5_56", "M4A1",
-                    "Stim",
-                    "Airstrike", "Cluster_Grenade", "Flashbang", "Grenade", "Semtex",
-                    "MG34",
-                    "Kar98k",
-                    "Combat_Knife",
-                    "50_GS", "357_Magnum",
-                    "RPG-7", "RPG_7",
-                    "Origin_12", "R9-0", "R9_0",
-                    "AX-50", "AX_50",
-                    "AUG", "Uzi"));
-
-            InfoHandler infoHandler = getWeaponHandler().getInfoHandler();
-            int counter = 0;
-
-            for (String weapon : infoHandler.getSortedWeaponList()) {
-                if (!defaultWeapons.contains(weapon)) {
-                    ++counter;
-                }
-            }
-
-            if (counter <= 0) {
-                return "0";
-            } else if (counter <= 5) {
-                return "1-5";
-            } else if (counter <= 10) {
-                return "6-10";
-            } else if (counter <= 20) {
-                return "11-20";
-            } else if (counter <= 30) {
-                return "21-30";
-            } else if (counter <= 50) {
-                return "31-50";
-            } else if (counter <= 100) {
-                return "51-100";
-            } else {
-                return ">100";
-            }
-        }));
-
-        metrics.addCustomChart(new SimplePie("core_version", () -> MechanicsCore.getPlugin().getDescription().getVersion()));
-    }
-
     public TaskChain onReload() {
         JavaPlugin mechanicsCore = MechanicsCore.getPlugin();
 
@@ -596,7 +430,6 @@ public class WeaponMechanics {
                     registerListeners();
                     registerCommands();
                     registerPermissions();
-                    registerUpdateChecker();
                     setupDatabase();
 
                     for (Player player : Bukkit.getOnlinePlayers()) {

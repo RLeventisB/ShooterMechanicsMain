@@ -12,6 +12,7 @@ import me.deecaad.core.utils.NumberUtil;
 import me.deecaad.core.utils.StringUtil;
 import me.deecaad.weaponmechanics.WeaponMechanics;
 import me.deecaad.weaponmechanics.utils.CustomTag;
+import me.deecaad.weaponmechanics.utils.NumberHelper;
 import me.deecaad.weaponmechanics.weapon.WeaponHandler;
 import me.deecaad.weaponmechanics.weapon.firearm.FirearmAction;
 import me.deecaad.weaponmechanics.weapon.firearm.FirearmState;
@@ -45,16 +46,15 @@ import org.vivecraft.VSE;
 import org.vivecraft.VivePlayer;
 
 import org.jetbrains.annotations.Nullable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+
+import java.util.*;
 
 import static me.deecaad.weaponmechanics.WeaponMechanics.*;
 
 public class ShootHandler implements IValidator, TriggerListener {
 
     private WeaponHandler weaponHandler;
-
+    private HashMap<String, HashSet<String>> weaponTitlesOnDelay;
     /**
      * Hardcoded full auto values. For every 1 in the array, the gun will fire
      * on that tick. Some indexes are marked as <i>"perfect"</i>. This means
@@ -107,10 +107,14 @@ public class ShootHandler implements IValidator, TriggerListener {
             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}  // 20 good
     };
 
-    public ShootHandler() {
+    public ShootHandler()
+    {
+        weaponTitlesOnDelay = new HashMap<>();
     }
 
-    public ShootHandler(WeaponHandler weaponHandler) {
+    public ShootHandler(WeaponHandler weaponHandler)
+    {
+        weaponTitlesOnDelay = new HashMap<>();
         this.weaponHandler = weaponHandler;
     }
 
@@ -129,9 +133,7 @@ public class ShootHandler implements IValidator, TriggerListener {
         Trigger trigger = getConfigurations().getObject(weaponTitle + ".Shoot.Trigger", Trigger.class);
         if (trigger == null || !trigger.check(triggerType, slot, entityWrapper)) return false;
 
-        boolean result = shootWithoutTrigger(entityWrapper, weaponTitle, weaponStack, slot, triggerType, dualWield);
-
-        return result;
+        return shootWithoutTrigger(entityWrapper, weaponTitle, weaponStack, slot, triggerType, dualWield);
     }
 
     /**
@@ -244,7 +246,8 @@ public class ShootHandler implements IValidator, TriggerListener {
         // Only check if selective fire doesn't have auto selected and it isn't melee
         if (selectiveFireState != SelectiveFireState.AUTO && !isMelee) {
             int delayBetweenShots = config.getInt(weaponTitle + ".Shoot.Delay_Between_Shots");
-            if (delayBetweenShots != 0 && !NumberUtil.hasMillisPassed(handData.getLastShotTime(), delayBetweenShots))
+            HashSet<String> weaponTitleOnDelay = this.weaponTitlesOnDelay.get(entityWrapper.getEntity().getName());
+            if (delayBetweenShots != 0 && (weaponTitleOnDelay != null && weaponTitleOnDelay.contains(weaponTitle)))
                 return false;
         }
 
@@ -261,7 +264,7 @@ public class ShootHandler implements IValidator, TriggerListener {
             return false;
 
         if (isMelee) {
-            return singleShot(entityWrapper, weaponTitle, weaponStack, handData, slot, dualWield, isMelee);
+            return singleShot(entityWrapper, weaponTitle, weaponStack, handData, slot, dualWield, true);
         }
 
         if (usesSelectiveFire) {
@@ -269,7 +272,7 @@ public class ShootHandler implements IValidator, TriggerListener {
                 case BURST -> burstShot(entityWrapper, weaponTitle, weaponStack, handData, slot, dualWield);
                 case AUTO ->
                         fullAutoShot(entityWrapper, weaponTitle, weaponStack, handData, slot, triggerType, dualWield);
-                default -> singleShot(entityWrapper, weaponTitle, weaponStack, handData, slot, dualWield, isMelee);
+                default -> singleShot(entityWrapper, weaponTitle, weaponStack, handData, slot, dualWield, false);
             };
         }
 
@@ -624,8 +627,8 @@ public class ShootHandler implements IValidator, TriggerListener {
         Mechanics shootMechanics = config.getObject(weaponTitle + ".Shoot.Mechanics", Mechanics.class);
         boolean resetFallDistance = config.getBool(weaponTitle + ".Shoot.Reset_Fall_Distance");
         Projectile projectile = config.getObject(weaponTitle + ".Projectile", Projectile.class);
-        double projectileSpeed = config.getDouble(weaponTitle + ".Shoot.Projectile_Speed");
-        int projectileAmount = config.getInt(weaponTitle + ".Shoot.Projectiles_Per_Shot");
+        Number projectileSpeed = config.getNumber(weaponTitle + ".Shoot.Projectile_Speed");
+        Number projectileAmount = config.getNumber(weaponTitle + ".Shoot.Projectiles_Per_Shot");
 
         PrepareWeaponShootEvent prepareEvent = new PrepareWeaponShootEvent(weaponTitle, weaponStack, entityWrapper.getEntity(), slot, shootMechanics, resetFallDistance, projectile, projectileSpeed, projectileAmount);
         Bukkit.getPluginManager().callEvent(prepareEvent);
@@ -649,6 +652,7 @@ public class ShootHandler implements IValidator, TriggerListener {
                 weaponInfoDisplay.send(playerWrapper, slot);
         }
 
+        final String weaponTitleKey = entityWrapper.getEntity().getName();
         if (projectile == null || isMelee) {
             debug.debug("Missing projectile/isMelee for " + weaponTitle);
             // No projectile defined or was melee trigger
@@ -661,6 +665,20 @@ public class ShootHandler implements IValidator, TriggerListener {
                 HandData handData = mainHand ? entityWrapper.getMainHandData() : entityWrapper.getOffHandData();
                 handData.setLastShotTime(System.currentTimeMillis());
                 handData.setLastWeaponShot(weaponTitle, weaponStack);
+
+                HashSet<String> weaponTitleOnDelay = this.weaponTitlesOnDelay.get(weaponTitleKey);
+                if (weaponTitleOnDelay == null) {
+                    weaponTitleOnDelay = new HashSet();
+                    this.weaponTitlesOnDelay.put(weaponTitleKey, weaponTitleOnDelay);
+                }
+                weaponTitleOnDelay.add(weaponTitle);
+                int delayBetweenShots = config.getInt(weaponTitle + ".Shoot.Delay_Between_Shots") / 50;
+                new BukkitRunnable(){
+
+                    public void run() {
+                        (ShootHandler.this.weaponTitlesOnDelay.get(weaponTitleKey)).remove(weaponTitle);
+                    }
+                }.runTaskLater(WeaponMechanics.getPlugin(), delayBetweenShots);
             }
 
             return;
@@ -680,7 +698,7 @@ public class ShootHandler implements IValidator, TriggerListener {
             // i == prepareEvent.getProjectileAmount()
             // Change the spread after all pellets are shot
             Vector motion = spread != null
-                    ? spread.getNormalizedSpreadDirection(entityWrapper, perProjectileShootLocation, mainHand, i == prepareEvent.getProjectileAmount() - 1 && updateSpreadChange).multiply(prepareEvent.getProjectileSpeed())
+                    ? spread.getNormalizedSpreadDirection(entityWrapper, perProjectileShootLocation, mainHand, i == prepareEvent.getProjectileAmount() - 1 && updateSpreadChange, i, prepareEvent.getProjectileAmount()).multiply(prepareEvent.getProjectileSpeed())
                     : perProjectileShootLocation.getDirection().multiply(prepareEvent.getProjectileSpeed());
 
             if (recoil != null && i == 0 && livingEntity instanceof Player) {
@@ -722,6 +740,20 @@ public class ShootHandler implements IValidator, TriggerListener {
         HandData handData = mainHand ? entityWrapper.getMainHandData() : entityWrapper.getOffHandData();
         handData.setLastShotTime(System.currentTimeMillis());
         handData.setLastWeaponShot(weaponTitle, weaponStack);
+
+        HashSet<String> weaponTitleOnDelay = this.weaponTitlesOnDelay.get(weaponTitleKey);
+        if (weaponTitleOnDelay == null) {
+            weaponTitleOnDelay = new HashSet();
+            this.weaponTitlesOnDelay.put(weaponTitleKey, weaponTitleOnDelay);
+        }
+        weaponTitleOnDelay.add(weaponTitle);
+        int delayBetweenShots = config.getInt(weaponTitle + ".Shoot.Delay_Between_Shots") / 50;
+        new BukkitRunnable(){
+
+            public void run() {
+                (ShootHandler.this.weaponTitlesOnDelay.get(weaponTitleKey)).remove(weaponTitle);
+            }
+        }.runTaskLater(WeaponMechanics.getPlugin(), delayBetweenShots);
     }
 
     /**
@@ -739,14 +771,14 @@ public class ShootHandler implements IValidator, TriggerListener {
         if (projectile == null) return;
 
         Location shootLocation = getShootLocation(livingEntity, false, true);
-        double projectileSpeed = config.getDouble(weaponTitle + ".Shoot.Projectile_Speed");
+        Number projectileSpeed = config.getDouble(weaponTitle + ".Shoot.Projectile_Speed");
 
         for (int i = 0; i < config.getInt(weaponTitle + ".Shoot.Projectiles_Per_Shot"); ++i) {
 
             Location perProjectileShootLocation = shootLocation.clone();
 
             // Only create bullet first if WeaponShootEvent changes
-            WeaponProjectile bullet = projectile.create(livingEntity, perProjectileShootLocation, normalizedDirection.clone().multiply(projectileSpeed), null, weaponTitle, null);
+            WeaponProjectile bullet = projectile.create(livingEntity, perProjectileShootLocation, normalizedDirection.clone().multiply(projectileSpeed.doubleValue()), null, weaponTitle, null);
 
             WeaponShootEvent shootEvent = new WeaponShootEvent(bullet);
             Bukkit.getPluginManager().callEvent(shootEvent);
@@ -836,20 +868,14 @@ public class ShootHandler implements IValidator, TriggerListener {
         if (trigger == null)
             throw new SerializerMissingKeyException(data.serializer, data.key + ".Trigger", data.of("Trigger").getLocation());
 
-        double projectileSpeed = data.of("Projectile_Speed").assertPositive().getDouble(80);
+        Number projectileSpeed = data.of("Projectile_Speed").assertPositive().getNumber(4);
+        configuration.set(data.key + ".Projectile_Speed", projectileSpeed);
 
-        // Convert from more config friendly speed to normal
-        // E.g. 80 -> 4.0
-        configuration.set(data.key + ".Projectile_Speed", projectileSpeed / 20);
-
-        int delayBetweenShots = data.of("Delay_Between_Shots").assertPositive().getInt(0);
-        if (delayBetweenShots != 0) {
+        Number delayBetweenShots = data.of("Delay_Between_Shots").assertPositive().getInt(0);
+        if (delayBetweenShots.intValue() != 0) {
             // Convert to millis
-            configuration.set(data.key + ".Delay_Between_Shots", delayBetweenShots * 50);
+            configuration.set(data.key + ".Delay_Between_Shots", NumberHelper.multBy(delayBetweenShots, 50));
         }
-
-        int projectilesPerShot = data.of("Projectiles_Per_Shot").assertRange(1, 100).getInt(1);
-        configuration.set(data.key + ".Projectiles_Per_Shot", projectilesPerShot);
 
         boolean hasBurst = false;
         boolean hasAuto = false;

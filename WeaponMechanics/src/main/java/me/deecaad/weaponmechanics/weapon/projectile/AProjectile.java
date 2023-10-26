@@ -63,7 +63,20 @@ public abstract class AProjectile {
         this.scripts = new LinkedList<>(); //dynamic, O(1) resize
         onStart();
     }
+    public void onAdd(){
 
+    }
+    public boolean isDragOnlyHorizontal() {
+        return false;
+    }
+
+    public boolean isYCappedOnHorizontalDrag() {
+        return false;
+    }
+
+    public boolean isPositiveYDraggedWhenDragIsHorizontal() {
+        return true;
+    }
     /**
      * @return gravity of projectile
      */
@@ -348,8 +361,23 @@ public abstract class AProjectile {
         if (gravity != 0) {
             motion.setY(motion.getY() - gravity);
         }
-        motion.multiply(getDrag());
-
+        double drag = getDrag();
+        if (drag != 1.0) {
+            if (this.isDragOnlyHorizontal()) {
+                if (this.motion.getY() > 0.0) {
+                    if (this.isYCappedOnHorizontalDrag()) {
+                        this.motion.setY(0);
+                    }
+                    if (this.isPositiveYDraggedWhenDragIsHorizontal()) {
+                        this.motion.setY(this.motion.getY() * drag);
+                    }
+                }
+                this.motion.setX(this.motion.getX() * drag);
+                this.motion.setZ(this.motion.getZ() * drag);
+            } else {
+                this.motion.multiply(drag);
+            }
+        }
         // Handle collisions will update location and distance travelled
         if (updatePosition()) {
             return true;

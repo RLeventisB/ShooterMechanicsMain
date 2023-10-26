@@ -21,12 +21,12 @@ public class PrepareWeaponShootEvent extends WeaponEvent implements Cancellable 
     private Mechanics shootMechanics;
     private boolean resetFallDistance;
     private Projectile projectile;
-    private double projectileSpeed;
-    private int projectileAmount;
+    private Number projectileSpeed;
+    private Number projectileAmount;
 
     private boolean isCancelled;
 
-    public PrepareWeaponShootEvent(String weaponTitle, ItemStack weaponStack, LivingEntity shooter, EquipmentSlot hand, Mechanics shootMechanics, boolean resetFallDistance, Projectile projectile, double projectileSpeed, int projectileAmount) {
+    public PrepareWeaponShootEvent(String weaponTitle, ItemStack weaponStack, LivingEntity shooter, EquipmentSlot hand, Mechanics shootMechanics, boolean resetFallDistance, Projectile projectile, Number projectileSpeed, Number projectileAmount) {
         super(weaponTitle, weaponStack, shooter, hand);
         this.shootMechanics = shootMechanics;
         this.resetFallDistance = resetFallDistance;
@@ -62,7 +62,7 @@ public class PrepareWeaponShootEvent extends WeaponEvent implements Cancellable 
     }
 
     public double getProjectileSpeed() {
-        return projectileSpeed;
+        return projectileSpeed.doubleValue();
     }
 
     public void setProjectileSpeed(double projectileSpeed) {
@@ -70,7 +70,7 @@ public class PrepareWeaponShootEvent extends WeaponEvent implements Cancellable 
     }
 
     public int getProjectileAmount() {
-        return projectileAmount;
+        return projectileAmount.intValue();
     }
 
     public void setProjectileAmount(int projectileAmount) {

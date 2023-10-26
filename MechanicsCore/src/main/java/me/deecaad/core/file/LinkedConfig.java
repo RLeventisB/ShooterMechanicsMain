@@ -1,6 +1,8 @@
 package me.deecaad.core.file;
 
+import me.deecaad.core.utils.IntegerRandomNumber;
 import me.deecaad.core.utils.LogLevel;
+import me.deecaad.core.utils.RandomNumber;
 import me.deecaad.core.utils.StringUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -8,6 +10,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -131,7 +134,25 @@ public class LinkedConfig extends LinkedHashMap<String, Object> implements Confi
             return ((Number) value).doubleValue();
         }
     }
+    @Override
+    public Number getNumber(@Nonnull String key) {
+        return this.getNumber(key, 0.0);
+    }
 
+    @Override
+    public Number getNumber(String key, Number def) {
+        Object value = super.get(key);
+        if (!(value instanceof Number)) {
+            return def;
+        }
+        if (value instanceof IntegerRandomNumber) {
+            return (IntegerRandomNumber)value;
+        }
+        if (value instanceof RandomNumber) {
+            return (RandomNumber)value;
+        }
+        return (Number)value;
+    }
     @Override
     public boolean getBool(@NotNull String key) {
         Object value = super.get(key);

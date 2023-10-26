@@ -12,11 +12,10 @@ import org.jetbrains.annotations.NotNull;
 public class Spread implements Serializer<Spread> {
 
     private SpreadImage spreadImage;
-
     private double baseSpread;
     private ModifySpreadWhen modifySpreadWhen;
     private ChangingSpread changingSpread;
-
+    private boolean evenSpread;
     /**
      * Default constructor for serializer
      */
@@ -27,15 +26,16 @@ public class Spread implements Serializer<Spread> {
         this.spreadImage = spreadImage;
     }
 
-    public Spread(double baseSpread, ModifySpreadWhen modifySpreadWhen, ChangingSpread changingSpread) {
-        this(null, baseSpread, modifySpreadWhen, changingSpread);
+    public Spread(double baseSpread, ModifySpreadWhen modifySpreadWhen, ChangingSpread changingSpread, boolean evenSpread) {
+        this(null, baseSpread, modifySpreadWhen, changingSpread, evenSpread);
     }
 
-    public Spread(SpreadImage spreadImage, double baseSpread, ModifySpreadWhen modifySpreadWhen, ChangingSpread changingSpread) {
+    public Spread(SpreadImage spreadImage, double baseSpread, ModifySpreadWhen modifySpreadWhen, ChangingSpread changingSpread, boolean evenSpread) {
         this.spreadImage = spreadImage;
         this.baseSpread = baseSpread;
         this.modifySpreadWhen = modifySpreadWhen;
         this.changingSpread = changingSpread;
+        this.evenSpread = evenSpread;
     }
 
     /**
@@ -47,7 +47,7 @@ public class Spread implements Serializer<Spread> {
      * @param updateSpreadChange whether or not to allow updating current spread change
      * @return the normalized spread direction
      */
-    public Vector getNormalizedSpreadDirection(EntityWrapper entityWrapper, Location shootLocation, boolean mainHand, boolean updateSpreadChange) {
+    public Vector getNormalizedSpreadDirection(EntityWrapper entityWrapper, Location shootLocation, boolean mainHand, boolean updateSpreadChange, int shotNum, int totalShots) {
         double yaw = Math.toRadians(shootLocation.getYaw()), pitch = Math.toRadians(shootLocation.getPitch());
         if (spreadImage != null) {
             Point point = spreadImage.getLocation();
@@ -59,6 +59,14 @@ public class Spread implements Serializer<Spread> {
 
         if (modifySpreadWhen != null) spread = modifySpreadWhen.applyChanges(entityWrapper, spread);
         if (changingSpread != null) spread = changingSpread.applyChanges(entityWrapper, spread, mainHand, updateSpreadChange);
+
+        if (this.evenSpread && totalShots > 1) {
+            double ang = -Math.toRadians(shootLocation.getYaw()) + ((double)shotNum / (double)(--totalShots) * 2.0 - 1.0) * spread;
+            double horizontalScale = Math.cos(Math.toRadians(shootLocation.getPitch()));
+            double x = Math.sin(ang);
+            double z = Math.cos(ang);
+            return new Vector(x * horizontalScale, shootLocation.getDirection().getY(), z * horizontalScale);
+        }
 
         return getNormalizedSpreadDirection(yaw, pitch, spread);
     }
@@ -102,6 +110,7 @@ public class Spread implements Serializer<Spread> {
 
         ModifySpreadWhen modifySpreadWhen = (ModifySpreadWhen) data.of("Modify_Spread_When").serialize(new ModifySpreadWhen());
         ChangingSpread changingSpread = data.of("Changing_Spread").serialize(ChangingSpread.class);
-        return new Spread(spreadImage, baseSpread, modifySpreadWhen, changingSpread);
+        boolean evenSpread = data.of("Even_Spread").getBool(false);
+        return new Spread(spreadImage, baseSpread, modifySpreadWhen, changingSpread, evenSpread);
     }
 }

@@ -68,7 +68,7 @@ import static org.bukkit.ChatColor.*;
 
 @SuppressWarnings("unchecked")
 public class WeaponMechanicsCommand {
-
+    public static final HashMap<UUID, Location> lastGroundMap = new HashMap();
     public static String WIKI = "https://github.com/WeaponMechanics/MechanicsMain/wiki";
     public static char SYM = '\u27A2';
 
@@ -147,6 +147,73 @@ public class WeaponMechanicsCommand {
                             give(sender, Collections.singletonList(sender), (String) args[0], (int) args[1], (Map) args[2]);
                         })))
 
+                .withSubcommand(new CommandBuilder("updateground")
+                        .withPermission("weaponmechanics.commands.updateground")
+                        .withDescription("Guarda ultima posicion en donde toco el suelo y lo tpea si entra a areas p.r.o.h.i.b.i.d.a.s")
+                        .withArgument(new Argument<>("target", new EntityListArgumentType()).withDesc("Quien procesaras."))
+                        .executes(CommandExecutor.any((sender, args) -> {
+                            for (Entity entity : (List<Entity>)args[0]) {
+                                if (!(entity instanceof Player player) || !player.isOnGround()) continue;
+                                UUID plrUuid = player.getUniqueId();
+                                boolean hasRegistredBack = lastGroundMap.containsKey(plrUuid);
+                                Location plrLoc = player.getLocation();
+                                boolean foundBarrier = false;
+                                for (double i = -0.32; i < 0.33; i += 0.32) {
+                                    block2: for (double j = -1.5; j < 1.5; j += 0.5) {
+                                        for (double k = -0.32; k < 0.33; k += 0.32) {
+                                            Location loc = plrLoc.clone();
+                                            loc.add(i, j, k);
+                                            if (loc.getBlock().getType() != Material.STRUCTURE_VOID) continue;
+                                            foundBarrier = true;
+                                            continue block2;
+                                        }
+                                    }
+                                }
+                                if (foundBarrier) {
+                                    if (!hasRegistredBack) continue;
+                                    Location lastGrounded = lastGroundMap.get(plrUuid);
+                                    if (plrLoc.getWorld().getBlockAt(lastGrounded).getType() == Material.STRUCTURE_VOID) continue;
+                                    player.teleport(lastGrounded);
+                                    player.sendMessage(String.valueOf(ChatColor.RED) + "oops entraste a una zona restringida!!! te devolveremos para tu seguridad.\n(seras mutilado si sigues aqui)");
+                                    player.setVelocity(new Vector(0, 0, 0));
+                                    continue;
+                                }
+                                if (!entity.isOnGround() || foundBarrier) continue;
+                                lastGroundMap.put(plrUuid, plrLoc);
+                            }})))
+
+                .withSubcommand(new CommandBuilder("removeground")
+                        .withPermission("weaponmechanics.commands.removeground")
+                        .withDescription("Borra la ultima posicion en donde toco el suelo para amogus")
+                        .withArgument(new Argument<>("target", new EntityListArgumentType()).withDesc("Quien procesaras."))
+                        .executes(CommandExecutor.any((sender, args) -> {
+                            for (Entity entity : (List<Entity>)args[0]) {
+                                Player player;
+                                if (!(entity instanceof Player) || !(player = (Player)entity).isOnGround()) continue;
+                                UUID plrUuid = player.getUniqueId();
+                                lastGroundMap.remove(plrUuid);
+                            }
+                        })))
+
+                .withSubcommand(new CommandBuilder("shownearbyground")
+                        .withDescription("Te muestra las areas restringidas!!!")
+                        .executes(CommandExecutor.entity((sender, args) -> {
+                    if (sender instanceof Player player) {
+                        Location loc = player.getLocation().getBlock().getLocation();
+                        loc.add(0.5, 0.5, 0.5);
+                        Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB((int)255, (int)0, (int)0), 2.0f);
+                        for (int i = -30; i < 31; ++i) {
+                            for (int j = -30; j < 31; ++j) {
+                                for (int k = -30; k < 31; ++k) {
+                                    Location cloneLoc = loc.clone();
+                                    cloneLoc.add(i, j, k);
+                                    if (cloneLoc.getBlock().getType() != Material.STRUCTURE_VOID) continue;
+                                    cloneLoc.getWorld().spawnParticle(Particle.REDSTONE, cloneLoc, 1, 0.0, 0.0, 0.0, 0.0, (Object)dustOptions);
+                                }
+                            }
+                        }
+                    }
+                })))
                 .withSubcommand(new CommandBuilder("ammo")
                         .withPermission("weaponmechanics.commands.ammo")
                         .withDescription("Gets ammo for held weapon")
@@ -1017,7 +1084,7 @@ public class WeaponMechanicsCommand {
     public static void shoot(LivingEntity sender, double speed, double gravity, EntityType entity) {
         ProjectileSettings projectileSettings = new ProjectileSettings(entity, null,
                 gravity, false, -1, false,
-                -1, 0.99, 0.96, 0.98, false, 600, -1, 0.1);
+                -1, 0.99, 0.96, 0.98, false, 600, -1, 0.1, 0, 0, false, false, true);
         Projectile projectile = new Projectile(projectileSettings, null, null, null, null);
         projectile.shoot(sender, sender.getEyeLocation(), sender.getLocation().getDirection().multiply(speed), null, null, null);
     }

@@ -4,7 +4,6 @@ object Versions {
 
     // Spigot + Plugins
     const val LATEST_SPIGOT_API = "1.20.1-R0.1-SNAPSHOT"
-    const val BSTATS = "3.0.1"
     const val PROTOCOL_LIB = "5.1.0"
     const val PLACEHOLDER_API = "2.11.3"
     const val MYTHIC_MOBS = "5.3.5"
@@ -25,7 +24,6 @@ object Dependencies {
 
     // Spigot + Plugins
     const val LATEST_SPIGOT_API = "org.spigotmc:spigot-api:${Versions.LATEST_SPIGOT_API}"
-    const val BSTATS = "org.bstats:bstats-bukkit:${Versions.BSTATS}"
     const val PROTOCOL_LIB = "com.comphenix.protocol:ProtocolLib:${Versions.PROTOCOL_LIB}"
     const val PLACEHOLDER_API = "me.clip:placeholderapi:${Versions.PLACEHOLDER_API}"
     const val MYTHIC_MOBS = "io.lumine:Mythic-Dist:${Versions.MYTHIC_MOBS}"

@@ -20,16 +20,7 @@ dependencies {
     implementation(project(":WorldGuardV6"))
     implementation(project(":WorldGuardV7"))
 
-    implementation(project(":Core_1_12_R1"))
-    implementation(project(":Core_1_13_R2"))
-    implementation(project(":Core_1_14_R1"))
-    implementation(project(":Core_1_15_R1"))
-    implementation(project(":Core_1_16_R3"))
-    implementation(project(":Core_1_17_R1", "reobf"))
-    implementation(project(":Core_1_18_R2", "reobf"))
-    implementation(project(":Core_1_19_R3", "reobf"))
     implementation(project(":Core_1_20_R1", "reobf"))
-    implementation(project(":Core_1_20_R2", "reobf"))
 }
 
 tasks {
@@ -62,16 +53,7 @@ tasks.named<ShadowJar>("shadowJar") {
         include(project(":WorldGuardV6"))
         include(project(":WorldGuardV7"))
 
-        include(project(":Core_1_12_R1"))
-        include(project(":Core_1_13_R2"))
-        include(project(":Core_1_14_R1"))
-        include(project(":Core_1_15_R1"))
-        include(project(":Core_1_16_R3"))
-        include(project(":Core_1_17_R1"))
-        include(project(":Core_1_18_R2"))
-        include(project(":Core_1_19_R3"))
         include(project(":Core_1_20_R1"))
-        include(project(":Core_1_20_R2"))
 
         relocate ("net.kyori", "me.deecaad.core.lib") {
             include(dependency("net.kyori::"))

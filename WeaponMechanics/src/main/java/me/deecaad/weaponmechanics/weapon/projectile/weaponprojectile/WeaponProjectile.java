@@ -107,7 +107,11 @@ public class WeaponProjectile extends AProjectile {
         isProjectileSettingsChanged = true;
     }
 
-
+    @Override
+    public void onAdd() {
+        this.projectileSettings.setGravityDelayTicks(this.projectileSettings.getGravityDelayTicks());
+        this.projectileSettings.setDragDelayTicks(this.projectileSettings.getDragDelayTicks());
+    }
     public @Nullable Sticky getSticky() {
         if (isStickyChanged || sticky == null)
             return sticky;
@@ -191,8 +195,22 @@ public class WeaponProjectile extends AProjectile {
     }
 
     @Override
+    public boolean isDragOnlyHorizontal() {
+        return this.projectileSettings.isDragHorizontal();
+    }
+
+    @Override
+    public boolean isYCappedOnHorizontalDrag() {
+        return this.projectileSettings.isYCappedOnHorizontalDrag();
+    }
+
+    @Override
+    public boolean isPositiveYDraggedWhenDragIsHorizontal() {
+        return this.projectileSettings.isPositiveYDraggedWhenDragIsHorizontal();
+    }
+    @Override
     public double getGravity() {
-        return rolling || stickedData != null ? 0 : projectileSettings.getGravity();
+        return rolling || stickedData != null || this.getAliveTicks() < this.projectileSettings.getGravityDelayTicks() ? 0.0 : this.projectileSettings.getGravity();
     }
 
     @Override
@@ -216,7 +234,11 @@ public class WeaponProjectile extends AProjectile {
     }
 
     @Override
-    public double getDrag() {
+    public double getDrag()
+    {
+        if (this.getAliveTicks() < this.projectileSettings.getDragDelayTicks()) {
+            return 1.0;
+        }
         if (getCurrentBlock().isLiquid())
             return projectileSettings.getDecreaseInWater();
         else if (getWorld().isThundering() || getWorld().hasStorm())

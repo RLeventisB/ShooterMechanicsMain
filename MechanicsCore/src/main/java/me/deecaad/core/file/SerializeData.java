@@ -1,9 +1,7 @@
 package me.deecaad.core.file;
 
 import me.deecaad.core.mechanics.Registry;
-import me.deecaad.core.utils.EnumUtil;
-import me.deecaad.core.utils.ReflectionUtil;
-import me.deecaad.core.utils.StringUtil;
+import me.deecaad.core.utils.*;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -789,9 +787,22 @@ public class SerializeData {
             if (value instanceof String str) {
                 try {
                     value = Double.valueOf(str);
-                } catch (NumberFormatException ex) {
-                    throw new SerializerTypeException(serializer, Number.class, value.getClass(), value, getLocation())
-                            .addMessage(wikiLink != null, getWikiMessage());
+                }
+                catch (NumberFormatException ex)
+                {
+                    try {
+                        RandomNumberParseResult resultD = RandomNumber.parseString(value);
+                        if (resultD.success) {
+                            return resultD.number;
+                        }
+                        IntegerRandomNumberParseResult resultI = IntegerRandomNumber.parseString(value);
+                        if (resultI.success) {
+                            return resultI.number;
+                        }
+                    }
+                    catch (Exception e) {
+                        throw new SerializerTypeException(SerializeData.this.serializer, Number.class, value.getClass(), value, this.getLocation()).addMessage(SerializeData.this.wikiLink != null, SerializeData.this.getWikiMessage());
+                    }
                 }
             }
 

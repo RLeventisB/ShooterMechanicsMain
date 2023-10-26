@@ -117,6 +117,10 @@ public interface Configuration {
      */
     double getDouble(@NotNull String key, double def);
 
+    public Number getNumber(String var1);
+
+    public Number getNumber(String var1, Number var2);
+
     /**
      * Returns the {@link String} present at the given <code>key</code>. If the
      * value at that location is not a {@link String}, or if the key is not
