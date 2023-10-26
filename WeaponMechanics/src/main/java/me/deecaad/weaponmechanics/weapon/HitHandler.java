@@ -52,7 +52,14 @@ public class HitHandler {
      */
     public boolean handleHit(RayTraceResult result, WeaponProjectile projectile) {
         if (result instanceof BlockTraceResult blockHit)
+        {
+            Vector normal = result.getHitFace().getDirection();
+            Explosion explosion = WeaponMechanics.getConfigurations().getObject(projectile.getWeaponTitle() + ".Explosion", Explosion.class);
+            if (explosion != null && explosion.getDetonation().getTriggers().contains(ExplosionTrigger.FLOOR) && normal.getX() == 0.0 && normal.getY() == 1.0 && normal.getZ() == 0.0) {
+                return this.handleFloorHit(blockHit, projectile, explosion);
+            }
             return handleBlockHit(blockHit, projectile);
+        }
         else if (result instanceof EntityTraceResult entityHit)
             return handleEntityHit(entityHit, projectile);
 
@@ -107,6 +114,18 @@ public class HitHandler {
         Explosion explosion = getConfigurations().getObject(projectile.getWeaponTitle() + ".Explosion", Explosion.class);
         if (explosion != null) explosion.handleExplosion(projectile.getShooter(), result.getHitLocation().clone().toLocation(projectile.getWorld()), projectile, ExplosionTrigger.BLOCK);
 
+        return false;
+    }
+
+    private boolean handleFloorHit(BlockTraceResult result, WeaponProjectile projectile, Explosion explosion) {
+        ProjectileHitBlockEvent hitBlockEvent = new ProjectileHitBlockEvent(projectile, result.getBlock(), result.getHitFace(), result.getHitLocation().clone());
+        Bukkit.getPluginManager().callEvent(hitBlockEvent);
+        if (hitBlockEvent.isCancelled()) {
+            return true;
+        }
+        if (explosion != null) {
+            explosion.handleExplosion(projectile.getShooter(), result.getHitLocation().clone().toLocation(projectile.getWorld()), projectile, ExplosionTrigger.FLOOR);
+        }
         return false;
     }
 

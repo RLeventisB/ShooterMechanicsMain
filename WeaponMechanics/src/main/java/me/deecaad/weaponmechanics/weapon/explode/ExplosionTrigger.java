@@ -16,4 +16,8 @@ public enum ExplosionTrigger {
      * When the projectile hits an entity
      */
     ENTITY,
+    /**
+     * When the projectile hits the top part of a solid block
+     */
+    FLOOR,
 }
