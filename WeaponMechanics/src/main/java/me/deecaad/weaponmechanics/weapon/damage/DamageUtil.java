@@ -287,37 +287,25 @@ public class DamageUtil {
      */
     public static boolean canHarmScoreboardTeams(LivingEntity cause, LivingEntity victim) {
 
-        // Owner invulnerability is handled separately.
-        if (cause.equals(victim))
+        if (cause.equals(victim)) {
             return true;
-
-        // Only check scoreboard teams for players
-        if (cause.getType() != EntityType.PLAYER || victim.getType() != EntityType.PLAYER) return true;
-
-        Scoreboard shooterScoreboard = ((Player) cause).getScoreboard();
-        if (shooterScoreboard == null) return true;
-
-        Set<Team> teams = shooterScoreboard.getTeams();
-        if (teams == null || teams.isEmpty()) return true;
-
-        for (Team team : teams) {
-            Set<String> entries = team.getEntries();
-
-            // Seems like this has to be also checked...
-            if (!entries.contains(cause.getName())) continue;
-
-            // If not in same team -> continue
-            if (!entries.contains(victim.getName())) continue;
-
-            // Now we know they're in same team.
-            // -> If friendly is not enabled
-            // --> they can't harm each other
-            if (!team.allowFriendlyFire()) {
-                // This approach only checks first same team WHERE friendly fire is enabled
-                return false;
-            }
         }
-
+        boolean isVictimPlayer = victim instanceof Player;
+        if (cause.getType() != EntityType.PLAYER) {
+            return true;
+        }
+        Scoreboard shooterScoreboard = ((Player)cause).getScoreboard();
+        Set<Team> teams = shooterScoreboard.getTeams();
+        if (teams.isEmpty()) {
+            return true;
+        }
+        for (Team team : teams) {
+            if (team.allowFriendlyFire()) continue;
+            if (isVictimPlayer) {
+                if (!team.hasEntry(cause.getName()) || !team.hasEntry(victim.getName())) continue;
+            } else if (!team.hasEntry(cause.getName()) || !team.hasEntry(victim.getUniqueId().toString())) continue;
+            return false;
+        }
         return true;
     }
 }

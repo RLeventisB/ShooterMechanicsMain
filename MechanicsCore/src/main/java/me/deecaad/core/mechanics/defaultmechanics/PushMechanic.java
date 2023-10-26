@@ -12,6 +12,7 @@ public class PushMechanic extends Mechanic {
 
     private double speed;
     private double verticalMultiplier;
+    private boolean add;
 
     /**
      * Default constructor for serializer.
@@ -19,9 +20,10 @@ public class PushMechanic extends Mechanic {
     public PushMechanic() {
     }
 
-    public PushMechanic(double speed, double verticalMultiplier) {
+    public PushMechanic(double speed, double verticalMultiplier, boolean add) {
         this.speed = speed;
         this.verticalMultiplier = verticalMultiplier;
+        this.add = add;
     }
 
     public double getSpeed() {
@@ -48,7 +50,13 @@ public class PushMechanic extends Mechanic {
 
         velocity.setY(velocity.getY() * verticalMultiplier);
         velocity.normalize().multiply(speed);
-        cast.getTarget().setVelocity(velocity);
+        if (this.add) {
+            Vector targetVelocity = cast.getTarget().getVelocity();
+            targetVelocity.add(velocity);
+            cast.getTarget().setVelocity(targetVelocity);
+        } else {
+            cast.getTarget().setVelocity(velocity);
+        }
     }
 
     @Override
@@ -66,7 +74,8 @@ public class PushMechanic extends Mechanic {
     public Mechanic serialize(@NotNull SerializeData data) throws SerializerException {
         double speed = data.of("Speed").assertExists().getDouble();
         double verticalMultiplier = data.of("Vertical_Multiplier").getDouble(1.0);
+        boolean add = data.of("Add").getBool(true);
 
-        return applyParentArgs(data, new PushMechanic(speed, verticalMultiplier));
+        return applyParentArgs(data, new PushMechanic(speed, verticalMultiplier, add));
     }
 }

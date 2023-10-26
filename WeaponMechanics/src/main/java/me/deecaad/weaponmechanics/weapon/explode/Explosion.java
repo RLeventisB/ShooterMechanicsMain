@@ -24,6 +24,7 @@ import me.deecaad.weaponmechanics.weapon.explode.regeneration.LayerDistanceSorte
 import me.deecaad.weaponmechanics.weapon.explode.regeneration.RegenerationData;
 import me.deecaad.weaponmechanics.weapon.explode.shapes.ExplosionShape;
 import me.deecaad.weaponmechanics.weapon.explode.shapes.ShapeFactory;
+import me.deecaad.weaponmechanics.weapon.placeholders.PExplosionPos;
 import me.deecaad.weaponmechanics.weapon.projectile.RemoveOnBlockCollisionProjectile;
 import me.deecaad.weaponmechanics.weapon.projectile.weaponprojectile.WeaponProjectile;
 import me.deecaad.weaponmechanics.weapon.stats.WeaponStat;
@@ -333,6 +334,7 @@ public class Explosion implements Serializer<Explosion> {
 
         if (flashbang != null) flashbang.trigger(exposure, projectile, origin);
         if (mechanics != null) { // NOT this.mechanics for event
+            PExplosionPos.explosionPos = projectile.getLocation();
             CastData cast = new CastData(cause, projectile == null ? null : projectile.getWeaponTitle(), projectile == null ? null : projectile.getWeaponStack());
             cast.setTargetLocation(origin);
             mechanics.use(cast);

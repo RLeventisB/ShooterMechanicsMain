@@ -871,6 +871,9 @@ public class ShootHandler implements IValidator, TriggerListener {
         Number projectileSpeed = data.of("Projectile_Speed").assertPositive().getNumber(4);
         configuration.set(data.key + ".Projectile_Speed", projectileSpeed);
 
+        Number projectilesPerShot = data.of("Projectiles_Per_Shot").getNumber(1);
+        configuration.set(data.key + ".Projectiles_Per_Shot", projectilesPerShot);
+
         Number delayBetweenShots = data.of("Delay_Between_Shots").assertPositive().getInt(0);
         if (delayBetweenShots.intValue() != 0) {
             // Convert to millis
