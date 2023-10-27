@@ -66,6 +66,7 @@ public class DamageHandler {
             return false;
 
         boolean isOwnerImmune = config.getBool(weaponTitle + ".Damage.Enable_Owner_Immunity");
+        boolean noDamage = config.getBool(weaponTitle + ".Damage.NoDamage");
         if (isOwnerImmune && victim.equals(shooter))
             return false;
 
@@ -119,21 +120,24 @@ public class DamageHandler {
         point = damageEntityEvent.getPoint();
         double finalDamage = damageEntityEvent.getFinalDamage();
 
-        if (DamageUtil.apply(shooter, victim, finalDamage)) {
-            WeaponMechanics.debug.debug("Damage was cancelled");
+        if(!noDamage)
+        {
+            if (DamageUtil.apply(shooter, victim, finalDamage)) {
+                WeaponMechanics.debug.debug("Damage was cancelled");
 
-            // Damage was cancelled
-            return false;
-        }
+                // Damage was cancelled
+                return false;
+            }
 
-        // Don't do WM armor damage when using vanilla damaging
-        if (!getBasicConfigurations().getBool("Damage.Use_Vanilla_Damaging", false)) {
-            DamageUtil.damageArmor(victim, damageEntityEvent.getArmorDamage(), point);
-        }
+            // Don't do WM armor damage when using vanilla damaging
+            if (!getBasicConfigurations().getBool("Damage.Use_Vanilla_Damaging", false)) {
+                DamageUtil.damageArmor(victim, damageEntityEvent.getArmorDamage(), point);
+            }
 
-        // Fire ticks
-        if (fireTicks > 0) {
-            victim.setFireTicks(fireTicks);
+            // Fire ticks
+            if (fireTicks > 0) {
+                victim.setFireTicks(fireTicks);
+            }
         }
 
         EntityWrapper shooterWrapper = WeaponMechanics.getEntityWrapper(shooter, true);
