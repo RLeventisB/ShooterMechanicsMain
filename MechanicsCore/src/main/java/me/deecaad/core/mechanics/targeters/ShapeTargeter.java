@@ -29,7 +29,7 @@ public abstract class ShapeTargeter extends RelativeTargeter {
 
         // We may have been targeting an entity or a got a cloned location. We
         // must set the target location here, so we are modifying the reference.
-        cast.setTargetLocation(source);
+        cast.setTargetLocation(source.clone());
 
         return new Iterator<>() {
             Vector previous;
@@ -46,6 +46,7 @@ public abstract class ShapeTargeter extends RelativeTargeter {
                     source.subtract(previous);
 
                 previous = points.next();
+                source.setDirection(previous.clone().multiply(-1).normalize());
                 source.add(previous);
                 return cast;
             }
