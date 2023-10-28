@@ -123,30 +123,32 @@ public class VectorSerializer implements Serializer<VectorSerializer> {
                     throw new SerializerTypeException(this, Number.class, String.class, input, data.of().getLocation());
                 }
             }
+            else
+            {
+                // When input starts with a '~', then the input is relative.
+                // This means that instead of x-y-z, it is left-up-forward.
+                relative = input.startsWith("~");
+                if (relative)
+                    input = input.substring(1);
 
-            // When input starts with a '~', then the input is relative.
-            // This means that instead of x-y-z, it is left-up-forward.
-            relative = input.startsWith("~");
-            if (relative)
-                input = input.substring(1);
+                String[] split = StringUtil.split(input);
+                if (split.length != 3) {
+                    throw data.exception(null, "Expected 3 numbers in left~up~forward format, instead got '" + split.length + "'",
+                            SerializerException.forValue(input));
+                }
 
-            String[] split = StringUtil.split(input);
-            if (split.length != 3) {
-                throw data.exception(null, "Expected 3 numbers in left~up~forward format, instead got '" + split.length + "'",
-                        SerializerException.forValue(input));
-            }
+                try {
+                    double x = Double.parseDouble(split[0]);
+                    double y = Double.parseDouble(split[1]);
+                    double z = Double.parseDouble(split[2]);
 
-            try {
-                double x = Double.parseDouble(split[0]);
-                double y = Double.parseDouble(split[1]);
-                double z = Double.parseDouble(split[2]);
-
-                raw = new Vector(x, y, z);
-            } catch (NumberFormatException ex) {
-                throw new SerializerTypeException(this, Number.class, String.class, input, data.of().getLocation());
+                    raw = new Vector(x, y, z);
+                } catch (NumberFormatException ex) {
+                    throw new SerializerTypeException(this, Number.class, String.class, input, data.of().getLocation());
+                }
             }
         }
-
+        create:
         return new VectorSerializer(randomLength, direction, relative, raw);
     }
 
