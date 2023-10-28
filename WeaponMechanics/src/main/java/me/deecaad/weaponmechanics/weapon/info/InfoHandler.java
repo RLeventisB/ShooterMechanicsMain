@@ -92,7 +92,8 @@ public class InfoHandler implements IValidator {
      *
      * @param weaponTitle the new weapon title
      */
-    public void addWeapon(String weaponTitle) {
+    public void addWeapon(String weaponTitle)
+    {
         weaponList.add(weaponTitle);
         if (!sortedWeaponList.contains(weaponTitle)) {
             sortedWeaponList.add(weaponTitle);

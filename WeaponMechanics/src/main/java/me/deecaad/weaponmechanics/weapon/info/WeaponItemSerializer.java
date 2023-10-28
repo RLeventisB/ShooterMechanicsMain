@@ -6,6 +6,8 @@ import me.deecaad.core.file.serializers.ItemSerializer;
 import me.deecaad.weaponmechanics.WeaponMechanics;
 import me.deecaad.weaponmechanics.utils.CustomTag;
 import me.deecaad.weaponmechanics.weapon.shoot.SelectiveFireState;
+import me.deecaad.weaponmechanics.weapon.weaponevents.WeaponRegisterEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -75,6 +77,8 @@ public class WeaponItemSerializer extends ItemSerializer {
 
         CustomTag.WEAPON_TITLE.setString(weaponStack, weaponTitle);
         weaponStack = super.serializeRecipe(data, weaponStack);
+        WeaponRegisterEvent event = new WeaponRegisterEvent(weaponTitle, weaponStack);
+        Bukkit.getPluginManager().callEvent(event);
         return weaponStack;
     }
 }
