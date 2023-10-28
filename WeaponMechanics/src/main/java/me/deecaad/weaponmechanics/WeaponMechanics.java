@@ -19,6 +19,7 @@ import me.deecaad.core.placeholder.PlaceholderHandler;
 import me.deecaad.core.utils.*;
 import me.deecaad.weaponmechanics.commands.WeaponMechanicsCommand;
 import me.deecaad.weaponmechanics.commands.WeaponMechanicsMainCommand;
+import me.deecaad.weaponmechanics.events.EndWeaponRegisterEvent;
 import me.deecaad.weaponmechanics.lib.MythicMobsLoader;
 import me.deecaad.weaponmechanics.listeners.ExplosionInteractionListeners;
 import me.deecaad.weaponmechanics.listeners.RepairItemListener;
@@ -298,6 +299,7 @@ public class WeaponMechanics {
 
             Configuration temp = new FileReader(debug, event.getSerializers(), event.getValidators()).fillAllFiles(getDataFolder(), "config.yml", "repair_kits", "attachments", "ammos", "placeholders");
             configurations.add(temp);
+            Bukkit.getPluginManager().callEvent(new EndWeaponRegisterEvent(WeaponMechanics.getWeaponHandler().getInfoHandler().getSortedWeaponList().size()));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (DuplicateKeyException e) {

@@ -18,7 +18,7 @@ import static me.deecaad.weaponmechanics.weapon.explode.raytrace.TraceCollision.
 
 public interface ExplosionExposure {
 
-    double FOV = Math.toRadians(70.0);
+    double DEFAULTFOV = Math.toRadians(70.0);
 
     /**
      * This method should return a list of entities that
@@ -49,7 +49,7 @@ public interface ExplosionExposure {
      * @return true if the entity can see the origin
      */
     default boolean canSee(@NotNull Location origin, @NotNull LivingEntity entity) {
-        return canSee(origin, entity, FOV);
+        return canSee(origin, entity, DEFAULTFOV);
     }
 
     /**

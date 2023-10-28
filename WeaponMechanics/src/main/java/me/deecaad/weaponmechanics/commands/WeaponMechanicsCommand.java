@@ -848,7 +848,7 @@ public class WeaponMechanicsCommand {
 
                 ExplosionExposure exposure = ReflectionUtil.newInstance(ExposureFactory.getInstance().getMap().get(exposureString));
                 Explosion explosion = new Explosion(shape, exposure, blockDamage, regeneration, null, 0.0, 1.0,
-                        null, null, new Flashbang(10.0, null), null);
+                        null, null, new Flashbang(10.0, null, 1), null);
                 explosion.explode(cause, origin, null);
             }
         }.runTaskLater(WeaponMechanics.getPlugin(), 100);

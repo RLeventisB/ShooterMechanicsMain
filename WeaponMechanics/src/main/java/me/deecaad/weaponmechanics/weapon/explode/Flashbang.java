@@ -19,15 +19,17 @@ public class Flashbang implements Serializer<Flashbang> {
 
     private double distance;
     private double distanceSquared;
+    private double fovMult;
     private Mechanics mechanics;
 
     public Flashbang() {
     }
 
-    public Flashbang(double distance, Mechanics mechanics) {
+    public Flashbang(double distance, Mechanics mechanics, double fovMult) {
         this.distance = distance;
         this.distanceSquared = distance * distance;
         this.mechanics = mechanics;
+        this.fovMult = fovMult;
     }
 
     public double getDistance() {
@@ -38,7 +40,12 @@ public class Flashbang implements Serializer<Flashbang> {
         this.distance = distance;
         this.distanceSquared = distance * distance;
     }
-
+    public void setFovMultiplier(double fovMult) {
+        this.fovMult = fovMult;
+    }
+    public double getFovMultiplier() {
+        return fovMult;
+    }
     public Mechanics getMechanics() {
         return mechanics;
     }
@@ -58,11 +65,7 @@ public class Flashbang implements Serializer<Flashbang> {
     public void trigger(ExplosionExposure exposure, WeaponProjectile projectile, Location origin) {
         Collection<Entity> entities = origin.getWorld().getNearbyEntities(origin, distance, distance, distance);
         for (Entity entity : entities) {
-            if (entity.getType() != EntityType.PLAYER) {
-                continue;
-            }
-            LivingEntity livingEntity = (LivingEntity) entity;
-            if (canEffect(exposure, origin, livingEntity)) {
+            if (entity instanceof LivingEntity livingEntity && canEffect(exposure, origin, livingEntity)) {
                 effect(projectile, livingEntity, origin);
             }
         }
@@ -85,7 +88,7 @@ public class Flashbang implements Serializer<Flashbang> {
         }
 
         // Check if the explosion exposure can effect the entity
-        return exposure.canSee(origin.add(0, 0.5, 0), entity);
+        return exposure.canSee(origin.add(0, 0.5, 0), entity, ExplosionExposure.DEFAULTFOV * fovMult);
     }
 
     public void effect(WeaponProjectile projectile, LivingEntity entity, Location origin) {
@@ -102,7 +105,8 @@ public class Flashbang implements Serializer<Flashbang> {
     public Flashbang serialize(@NotNull SerializeData data) throws SerializerException {
         double distance = data.of("Effect_Distance").assertExists().assertPositive().getDouble();
         Mechanics mechanics = data.of("Mechanics").assertExists().serialize(Mechanics.class);
+        double fovMultiplier = data.of("Fov_Multiplier").assertPositive().getDouble(1.0);
 
-        return new Flashbang(distance, mechanics);
+        return new Flashbang(distance, mechanics, fovMultiplier);
     }
 }
