@@ -150,7 +150,8 @@ public class DamageUtil {
         }
 
         // Visual red flash
-        WeaponCompatibilityAPI.getWeaponCompatibility().playHurtAnimation(victim);
+        if(WeaponMechanics.getBasicConfigurations().getBool("Play_Hurt_Animation", true))
+            WeaponCompatibilityAPI.getWeaponCompatibility().playHurtAnimation(victim);
 
         // Spigot api things
         victim.setLastDamage(damage);

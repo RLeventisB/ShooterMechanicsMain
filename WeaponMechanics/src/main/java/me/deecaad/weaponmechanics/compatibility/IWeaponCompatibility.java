@@ -53,7 +53,8 @@ public interface IWeaponCompatibility {
      *
      * @param victim The entity to show the red flash.
      */
-    default void playHurtAnimation(LivingEntity victim) {
-        victim.playEffect(EntityEffect.HURT);
+    default void playHurtAnimation(LivingEntity victim)
+    {
+        victim.playHurtAnimation(0);
     }
 }

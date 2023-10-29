@@ -155,7 +155,7 @@ public class HitHandler {
         hitPoint = hitEntityEvent.getPoint();
         backstab = hitEntityEvent.isBackStab();
 
-        if (!weaponHandler.getDamageHandler().tryUse(livingEntity, projectile, getConfigurations().getDouble(projectile.getWeaponTitle() + ".Damage.Base_Damage"), hitPoint, backstab)) {
+        if (!weaponHandler.getDamageHandler().tryUse(livingEntity, projectile, getConfigurations().getDouble(projectile.getWeaponTitle() + ".Damage.Base_Damage") * projectile.getProjectileSettings().getDamageMultiplier().doubleValue(), hitPoint, backstab)) {
             // Damage was cancelled
             return true;
         }

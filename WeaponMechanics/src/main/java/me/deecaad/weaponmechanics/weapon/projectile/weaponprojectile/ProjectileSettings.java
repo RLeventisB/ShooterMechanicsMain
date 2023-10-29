@@ -31,6 +31,7 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
     private Number decreaseInWater;
     private Number decreaseWhenRainingOrSnowing;
 
+    private Number damageMultiplier;
     private boolean disableEntityCollisions;
     private boolean applyDragHorizontally;
     private boolean maximizeYWhenDragIsHorizontal;
@@ -45,7 +46,7 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
     public ProjectileSettings() {
     }
 
-    public ProjectileSettings(EntityType projectileDisguise, Object disguiseData, Number gravity, boolean removeAtMinimumSpeed, Number minimumSpeed, boolean removeAtMaximumSpeed, Number maximumSpeed, Number decrease, Number decreaseInWater, Number decreaseWhenRainingOrSnowing, boolean disableEntityCollisions, Number maximumAliveTicks, Number maximumTravelDistance, Number size, Number gravityDelayTicks, Number dragDelayTicks, boolean applyDragHorizontally, boolean maximizeYWhenDragIsHorizontal, boolean dragPositiveYWhenDragIsHorizontal) {
+    public ProjectileSettings(EntityType projectileDisguise, Object disguiseData, Number gravity, boolean removeAtMinimumSpeed, Number minimumSpeed, boolean removeAtMaximumSpeed, Number maximumSpeed, Number decrease, Number decreaseInWater, Number decreaseWhenRainingOrSnowing, boolean disableEntityCollisions, Number maximumAliveTicks, Number maximumTravelDistance, Number size, Number gravityDelayTicks, Number dragDelayTicks, boolean applyDragHorizontally, boolean maximizeYWhenDragIsHorizontal, boolean dragPositiveYWhenDragIsHorizontal, Number damageMultiplier) {
         this.projectileDisguise = projectileDisguise;
         this.disguiseData = disguiseData;
         this.gravity = gravity;
@@ -65,6 +66,7 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
         this.applyDragHorizontally = applyDragHorizontally;
         this.maximizeYWhenDragIsHorizontal = maximizeYWhenDragIsHorizontal;
         this.dragPositiveYWhenDragIsHorizontal = dragPositiveYWhenDragIsHorizontal;
+        this.damageMultiplier = damageMultiplier;
     }
 
     /**
@@ -333,7 +335,8 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
         boolean applyDragHorizontally = data.of("Drag.OnlyHorizontally").getBool(false);
         boolean maximizeYWhenDragIsHorizontal = data.of("Drag.ZeroYWhenHorizontal").getBool(false);
         boolean dragPositiveYWhenDragIsHorizontal = data.of("Drag.DragPositiveYWhenHorizontal").getBool(true);
-        return new ProjectileSettings(projectileType, disguiseData, gravity, removeAtMinimumSpeed, minimumSpeed, removeAtMaximumSpeed, maximumSpeed, decrease, decreaseInWater, decreaseWhenRainingOrSnowing, disableEntityCollisions, maximumAliveTicks, maximumTravelDistance, size, gravityDelayTicks, dragDelayTicks, applyDragHorizontally, maximizeYWhenDragIsHorizontal, dragPositiveYWhenDragIsHorizontal);
+        Number damageMultiplier = data.of("Damage_Multiplier").getNumber(1.0);
+        return new ProjectileSettings(projectileType, disguiseData, gravity, removeAtMinimumSpeed, minimumSpeed, removeAtMaximumSpeed, maximumSpeed, decrease, decreaseInWater, decreaseWhenRainingOrSnowing, disableEntityCollisions, maximumAliveTicks, maximumTravelDistance, size, gravityDelayTicks, dragDelayTicks, applyDragHorizontally, maximizeYWhenDragIsHorizontal, dragPositiveYWhenDragIsHorizontal, damageMultiplier);
     }
 
     @Override
@@ -343,5 +346,13 @@ public class ProjectileSettings implements Serializer<ProjectileSettings>, Clone
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
+    }
+
+    public Number getDamageMultiplier() {
+        return damageMultiplier;
+    }
+
+    public void setDamageMultiplier(Number damageMultiplier) {
+        this.damageMultiplier = damageMultiplier;
     }
 }

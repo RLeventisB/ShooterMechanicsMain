@@ -19,6 +19,8 @@ import static me.deecaad.weaponmechanics.WeaponMechanics.getConfigurations;
 
 public class ClusterBomb implements Serializer<ClusterBomb> {
 
+    private double oldProjectileVelocityInfluence;
+    private boolean makeYAlwaysPositive;
     private Projectile projectile;
     private double speed;
     private int splits;
@@ -32,13 +34,15 @@ public class ClusterBomb implements Serializer<ClusterBomb> {
     public ClusterBomb() {
     }
 
-    public ClusterBomb(Projectile projectile, double speed, int splits, int bombs, Detonation detonation, Mechanics mechanics) {
+    public ClusterBomb(Projectile projectile, double speed, int splits, int bombs, Detonation detonation, Mechanics mechanics, boolean makeYAlwaysPositive, double oldProjectileVelocityInfluence) {
         this.projectile = projectile;
         this.speed = speed;
         this.splits = splits;
         this.bombs = bombs;
         this.detonation = detonation;
         this.mechanics = mechanics;
+        this.makeYAlwaysPositive = makeYAlwaysPositive;
+        this.oldProjectileVelocityInfluence = oldProjectileVelocityInfluence;
     }
 
     public Projectile getProjectile() {
@@ -48,15 +52,24 @@ public class ClusterBomb implements Serializer<ClusterBomb> {
     public double getSpeed() {
         return speed;
     }
-
     public int getSplits() {
         return splits;
     }
-
     public int getBombs() {
         return bombs;
     }
-
+    public boolean isMakeYAlwaysPositive() {
+        return makeYAlwaysPositive;
+    }
+    public void setMakeYAlwaysPositive(boolean makeYAlwaysPositive) {
+        this.makeYAlwaysPositive = makeYAlwaysPositive;
+    }
+    public double getOldProjectileVelocityInfluence() {
+        return oldProjectileVelocityInfluence;
+    }
+    public void setOldProjectileVelocityInfluence(double oldProjectileVelocityInfluence) {
+        this.oldProjectileVelocityInfluence = oldProjectileVelocityInfluence;
+    }
     public Detonation getDetonation() {
         return detonation;
     }
@@ -77,7 +90,9 @@ public class ClusterBomb implements Serializer<ClusterBomb> {
 
         for (int i = 0; i < bombs; i++) {
             Vector vector = VectorUtil.random(speed);
-            vector.setY(Math.abs(vector.getY()));
+            if(makeYAlwaysPositive)
+                vector.setY(Math.abs(vector.getY()));
+            vector.add(projectile.getMotion().multiply(oldProjectileVelocityInfluence));
 
             // Either use the projectile settings from the "parent" projectile,
             // or use the projectile settings for this cluster bomb
@@ -100,11 +115,13 @@ public class ClusterBomb implements Serializer<ClusterBomb> {
     public ClusterBomb serialize(@NotNull SerializeData data) throws SerializerException {
         int bombs = data.of("Number_Of_Bombs").assertExists().assertPositive().getInt();
         Projectile projectileSettings = data.of("Split_Projectile").serialize(Projectile.class);
-        double speed = data.of("Projectile_Speed").assertPositive().getDouble(30.0) / 20.0;
+        double speed = data.of("Projectile_Speed").assertPositive().getDouble(30.0);
         int splits = data.of("Number_Of_Splits").assertPositive().getInt(1);
         Detonation detonation = data.of("Detonation").serialize(Detonation.class);
         Mechanics mechanics = data.of("Mechanics").serialize(Mechanics.class);
+        boolean makeYAlwaysPositive = data.of("Make_Y_Velocity_Positive").getBool(false);
+        double oldProjectileVelocityInfluence = data.of("Old_Velocity_Influence").getDouble(0.0);
 
-        return new ClusterBomb(projectileSettings, speed, splits, bombs, detonation, mechanics);
+        return new ClusterBomb(projectileSettings, speed, splits, bombs, detonation, mechanics, makeYAlwaysPositive, oldProjectileVelocityInfluence);
     }
 }

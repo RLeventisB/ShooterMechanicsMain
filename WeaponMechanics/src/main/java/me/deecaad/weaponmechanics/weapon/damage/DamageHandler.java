@@ -1,5 +1,6 @@
 package me.deecaad.weaponmechanics.weapon.damage;
 
+import me.deecaad.core.compatibility.CompatibilityAPI;
 import me.deecaad.core.file.Configuration;
 import me.deecaad.core.mechanics.CastData;
 import me.deecaad.core.mechanics.Mechanics;
@@ -122,6 +123,12 @@ public class DamageHandler {
 
         if(!noDamage)
         {
+            double absorption = CompatibilityAPI.getEntityCompatibility().getAbsorption(victim);
+            if(victim.getHealth() - (finalDamage - absorption) <= 0)
+            {
+                Bukkit.getPluginManager().callEvent(new WeaponKillEntityEvent(weaponTitle, weaponStack, shooter, slot, victim, damageEntityEvent));
+            }
+
             if (DamageUtil.apply(shooter, victim, finalDamage)) {
                 WeaponMechanics.debug.debug("Damage was cancelled");
 
@@ -163,7 +170,6 @@ public class DamageHandler {
         boolean killed = false;
         if (victim.isDead() || victim.getHealth() <= 0.0) {
             killed = true;
-            Bukkit.getPluginManager().callEvent(new WeaponKillEntityEvent(weaponTitle, weaponStack, shooter, slot, victim, damageEntityEvent));
 
             if (damageEntityEvent.getKillMechanics() != null)
                 damageEntityEvent.getKillMechanics().use(cast);
@@ -264,7 +270,7 @@ public class DamageHandler {
         double damage = config.getDouble(weaponTitle + ".Damage.Base_Explosion_Damage");
         if (damage == 0) {
             // If explosion damage isn't used, use Base_Damage
-            damage = config.getDouble(weaponTitle + ".Damage.Base_Damage");
+            damage = config.getDouble(weaponTitle + ".Damage.Base_Damage") * projectile.getProjectileSettings().getDamageMultiplier().doubleValue();
         }
 
         for (DoubleEntry<LivingEntity> entry : exposures.entrySet()) {
