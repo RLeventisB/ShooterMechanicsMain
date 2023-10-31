@@ -276,9 +276,11 @@ public class InfoHandler implements IValidator {
 
         // Check that main hand weapon allows
         DualWield mainDualWield = getConfigurations().getObject(mainWeaponTitle + ".Info.Dual_Wield", DualWield.class);
-        if (mainDualWield == null) {
+        DualWield offDualWield = getConfigurations().getObject(offWeaponTitle + ".Info.Dual_Wield", DualWield.class);
+        if (mainDualWield == null)
+        {
+            return offDualWield == null || !offDualWield.isAlwaysAllow();
             // Doesn't allow since its null
-            return true;
         }
 
         // Check if works with off hand weapon
@@ -288,8 +290,8 @@ public class InfoHandler implements IValidator {
         }
 
         // Check that off hand weapon allows
-        DualWield offDualWield = getConfigurations().getObject(offWeaponTitle + ".Info.Dual_Wield", DualWield.class);
-        if (offDualWield == null) {
+        if (offDualWield == null)
+        {
             // Doesn't allow since its null
             return true;
         }

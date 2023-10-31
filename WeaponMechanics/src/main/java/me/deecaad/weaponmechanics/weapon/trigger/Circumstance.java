@@ -15,7 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class Circumstance implements Serializer<Circumstance> {
+public class Circumstance implements Serializer<Circumstance>
+{
 
     private List<CircumstanceData> circumstances;
     private Mechanics denyMechanics;
@@ -23,10 +24,12 @@ public class Circumstance implements Serializer<Circumstance> {
     /**
      * Default constructor for serializer
      */
-    public Circumstance() {
+    public Circumstance()
+    {
     }
 
-    public Circumstance(List<CircumstanceData> circumstances, Mechanics denyMechanics) {
+    public Circumstance(List<CircumstanceData> circumstances, Mechanics denyMechanics)
+    {
         this.circumstances = circumstances;
         this.denyMechanics = denyMechanics;
     }
@@ -37,12 +40,16 @@ public class Circumstance implements Serializer<Circumstance> {
      * @param entityWrapper the entity wrapper or null if not used
      * @return whether to deny
      */
-    public boolean deny(@Nullable EntityWrapper entityWrapper) {
+    public boolean deny(@Nullable EntityWrapper entityWrapper)
+    {
         if (entityWrapper == null) return true;
 
-        for (CircumstanceData circumstance : this.circumstances) {
-            if (circumstance.deny(entityWrapper)) {
-                if (denyMechanics != null) {
+        for (CircumstanceData circumstance : this.circumstances)
+        {
+            if (circumstance.deny(entityWrapper))
+            {
+                if (denyMechanics != null)
+                {
                     CastData cast = new CastData(entityWrapper.getEntity(), null, null);
                     cast.placeholders().put("deny_reason", circumstance.circumstanceType.getHumanName());
                     denyMechanics.use(cast);
@@ -55,25 +62,31 @@ public class Circumstance implements Serializer<Circumstance> {
 
     @NotNull
     @Override
-    public Circumstance serialize(@NotNull SerializeData data) throws SerializerException {
+    public Circumstance serialize(@NotNull SerializeData data) throws SerializerException
+    {
         ConfigurationSection circumstanceSection = data.of().assertExists().assertType(ConfigurationSection.class).get();
         List<CircumstanceData> circumstances = new ArrayList<>(1);
         Mechanics denyMechanics = data.of("Deny_Mechanics").serialize(Mechanics.class);
 
-        for (String type : circumstanceSection.getKeys(false)) {
+        for (String type : circumstanceSection.getKeys(false))
+        {
             if (type.equals("Deny_Mechanics"))
                 continue;
 
             String typeToUpper = type.toUpperCase(Locale.ROOT);
 
             String value = data.config.getString(data.key + "." + type);
-            if (!value.equalsIgnoreCase("DENY") && !value.equalsIgnoreCase("REQUIRED")) {
+            if (!value.equalsIgnoreCase("DENY") && !value.equalsIgnoreCase("REQUIRED"))
+            {
                 throw data.exception(type, "Only DENY and REQUIRED are allowed, now there was " + value + "!");
             }
 
-            try {
+            try
+            {
                 circumstances.add(new CircumstanceData(CircumstanceType.valueOf(typeToUpper), value.equalsIgnoreCase("REQUIRED")));
-            } catch (IllegalArgumentException e) {
+            }
+            catch (IllegalArgumentException e)
+            {
                 throw new SerializerEnumException(this, CircumstanceType.class, type, false, data.of().getLocation());
             }
         }
@@ -81,25 +94,46 @@ public class Circumstance implements Serializer<Circumstance> {
         return new Circumstance(circumstances, denyMechanics);
     }
 
-    public record CircumstanceData(CircumstanceType circumstanceType, boolean required) {
-        public boolean deny(EntityWrapper entityWrapper) {
-                return required != switch (circumstanceType) {
-                    case RELOADING -> entityWrapper.isReloading();
-                    case ZOOMING -> entityWrapper.isZooming();
-                    case SNEAKING -> entityWrapper.isSneaking();
-                    case STANDING -> entityWrapper.isStanding();
-                    case WALKING -> entityWrapper.isWalking();
-                    case RIDING -> entityWrapper.isRiding();
-                    case SPRINTING -> entityWrapper.isSprinting();
-                    case DUAL_WIELDING -> entityWrapper.isDualWielding();
-                    case SWIMMING -> entityWrapper.isSwimming();
-                    case IN_MIDAIR -> entityWrapper.isInMidair();
-                    case GLIDING -> entityWrapper.isGliding();
-                };
-            }
+    public record CircumstanceData(CircumstanceType circumstanceType, boolean required)
+    {
+        public boolean isTrue(EntityWrapper entityWrapper)
+        {
+            return switch (circumstanceType)
+            {
+                case RELOADING -> entityWrapper.isReloading();
+                case ZOOMING -> entityWrapper.isZooming();
+                case SNEAKING -> entityWrapper.isSneaking();
+                case STANDING -> entityWrapper.isStanding();
+                case WALKING -> entityWrapper.isWalking();
+                case RIDING -> entityWrapper.isRiding();
+                case SPRINTING -> entityWrapper.isSprinting();
+                case DUAL_WIELDING -> entityWrapper.isDualWielding();
+                case SWIMMING -> entityWrapper.isSwimming();
+                case IN_MIDAIR -> entityWrapper.isInMidair();
+                case GLIDING -> entityWrapper.isGliding();
+            };
         }
+        public boolean deny(EntityWrapper entityWrapper)
+        {
+            return required != switch (circumstanceType)
+            {
+                case RELOADING -> entityWrapper.isReloading();
+                case ZOOMING -> entityWrapper.isZooming();
+                case SNEAKING -> entityWrapper.isSneaking();
+                case STANDING -> entityWrapper.isStanding();
+                case WALKING -> entityWrapper.isWalking();
+                case RIDING -> entityWrapper.isRiding();
+                case SPRINTING -> entityWrapper.isSprinting();
+                case DUAL_WIELDING -> entityWrapper.isDualWielding();
+                case SWIMMING -> entityWrapper.isSwimming();
+                case IN_MIDAIR -> entityWrapper.isInMidair();
+                case GLIDING -> entityWrapper.isGliding();
+            };
+        }
+    }
 
-    private enum CircumstanceType {
+    public enum CircumstanceType
+    {
         RELOADING,
         ZOOMING,
         SNEAKING,
@@ -114,11 +148,13 @@ public class Circumstance implements Serializer<Circumstance> {
 
         private final String humanName;
 
-        CircumstanceType() {
+        CircumstanceType()
+        {
             this.humanName = name().toLowerCase(Locale.ROOT).replace("_", " ");
         }
 
-        public String getHumanName() {
+        public String getHumanName()
+        {
             return humanName;
         }
     }

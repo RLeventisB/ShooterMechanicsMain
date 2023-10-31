@@ -548,8 +548,13 @@ public class ReloadHandler implements IValidator, TriggerListener {
 
         if (otherWeapon == null) return;
 
-        // If other weapon isn't empty, don't automatically try to reload
-        if (getAmmoLeft(otherStack, otherWeapon) != 0) return;
+        int tempMagazineSize = getConfigurations().getInt(otherWeapon + ".Reload.Magazine_Size");
+
+        if(tempMagazineSize == -1)
+        {
+            return;
+        }
+        if(getAmmoLeft(otherStack, otherWeapon) == tempMagazineSize) return;
 
         startReloadWithoutTrigger(entityWrapper, otherWeapon, otherStack,
                 mainhand ? EquipmentSlot.OFF_HAND : EquipmentSlot.HAND, dualWield, false);

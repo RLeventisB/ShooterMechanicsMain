@@ -24,17 +24,18 @@ public class DualWield implements Serializer<DualWield> {
     private boolean whitelist;
     private Set<String> weapons;
     private Mechanics mechanics;
-
+    private boolean alwaysAllow;
     /**
      * Default constructor for serializer
      */
     public DualWield() {
     }
 
-    public DualWield(boolean whitelist, Set<String> weapons, Mechanics mechanics) {
+    public DualWield(boolean whitelist, Set<String> weapons, Mechanics mechanics, boolean alwaysAllow) {
         this.whitelist = whitelist;
         this.weapons = weapons;
         this.mechanics = mechanics;
+        this.alwaysAllow = alwaysAllow;
     }
 
     /**
@@ -43,7 +44,10 @@ public class DualWield implements Serializer<DualWield> {
      * @param weaponTitle the other weapon title
      * @return true only if dual wielding is allowed
      */
-    public boolean denyDualWieldingWith(String weaponTitle) {
+    public boolean denyDualWieldingWith(String weaponTitle)
+    {
+        if (alwaysAllow)
+            return false;
         if (!whitelist) {
             // If blacklist and list contains weapon title
             // -> dual wield is not allowed
@@ -54,6 +58,10 @@ public class DualWield implements Serializer<DualWield> {
         return !weapons.contains(weaponTitle.toLowerCase(Locale.ROOT));
     }
 
+    public boolean isAlwaysAllow()
+    {
+        return alwaysAllow;
+    }
     /**
      * Simply sends dual wield denied message for player.
      * Message is only sent if dual wield check cause is same as
@@ -85,16 +93,21 @@ public class DualWield implements Serializer<DualWield> {
 
     @Override
     @NotNull
-    public DualWield serialize(@NotNull SerializeData data) throws SerializerException {
-        List<String[]> weaponsList = data.ofList("Weapons")
-                .addArgument(String.class, true, true)
-                .assertExists().assertList().get();
+    public DualWield serialize(@NotNull SerializeData data) throws SerializerException
+    {
         Set<String> weapons = new HashSet<>();
+        if(data.has("Weapons"))
+        {
+            List<String[]> weaponsList = data.ofList("Weapons")
+                    .addArgument(String.class, true, true)
+                    .assertList().get();
 
-        // Saves weapons in lower case
-        weaponsList.forEach(weaponTitle -> weapons.add(weaponTitle[0].toLowerCase(Locale.ROOT)));
+            // Saves weapons in lower case
+            weaponsList.forEach(weaponTitle -> weapons.add(weaponTitle[0].toLowerCase(Locale.ROOT)));
+        }
         boolean whitelist = data.of("Whitelist").getBool(false);
         Mechanics mechanics = data.of("Mechanics_On_Deny").serialize(Mechanics.class);
-        return new DualWield(whitelist, weapons, mechanics);
+        boolean alwaysAllow = data.of("Always_Allow").getBool(false);
+        return new DualWield(whitelist, weapons, mechanics, alwaysAllow);
     }
 }
