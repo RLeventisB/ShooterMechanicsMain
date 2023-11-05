@@ -10,9 +10,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
-
-public class Through implements Serializer<Through>, Cloneable {
+public class Through implements Serializer<Through>, Cloneable
+{
 
     // -1 = infinite
     private double maximumThroughAmount;
@@ -23,36 +22,45 @@ public class Through implements Serializer<Through>, Cloneable {
     /**
      * Default constructor for serializer
      */
-    public Through() {
+    public Through()
+    {
     }
 
-    public Through(double maximumThroughAmount, ListHolder<Material> blocks, ListHolder<EntityType> entities) {
+    public Through(double maximumThroughAmount, ListHolder<Material> blocks, ListHolder<EntityType> entities)
+    {
         this.maximumThroughAmount = maximumThroughAmount;
         this.blocks = blocks;
         this.entities = entities;
     }
 
-    public double getMaximumThroughAmount() {
+    public double getMaximumThroughAmount()
+    {
         return maximumThroughAmount;
     }
 
-    public void setMaximumThroughAmount(double maximumThroughAmount) {
+    public void setMaximumThroughAmount(double maximumThroughAmount)
+    {
         this.maximumThroughAmount = maximumThroughAmount;
     }
 
     /**
      * @param projectile the projectile
-     * @param hit the hit entity or block
+     * @param hit        the hit entity or block
      * @return true if projectile went through, false if projectile should die
      */
-    public boolean handleThrough(WeaponProjectile projectile, RayTraceResult hit) {
-
+    public boolean handleThrough(WeaponProjectile projectile, RayTraceResult hit)
+    {
         Double speedModifier;
-        if (hit instanceof BlockTraceResult blockHit) {
+        if (hit instanceof BlockTraceResult blockHit)
+        {
             speedModifier = blocks != null ? blocks.isValid(blockHit.getBlockState().getType()) : null;
-        } else if (hit instanceof EntityTraceResult entityHit) {
+        }
+        else if (hit instanceof EntityTraceResult entityHit)
+        {
             speedModifier = entities != null ? entities.isValid(entityHit.getEntity().getType()) : null;
-        } else {
+        }
+        else
+        {
             // should never occur, projectile should die
             return false;
         }
@@ -61,7 +69,8 @@ public class Through implements Serializer<Through>, Cloneable {
         if (speedModifier == null)
             return false;
 
-        if (maximumThroughAmount != -1 && maximumThroughAmount - projectile.getThroughAmount() - hit.getThroughDistance() <= 0.0) {
+        if (maximumThroughAmount != -1 && maximumThroughAmount - projectile.getThroughAmount() - hit.getThroughDistance() <= 0.0)
+        {
             // Projectile should die
             return false;
         }
@@ -71,22 +80,21 @@ public class Through implements Serializer<Through>, Cloneable {
         return true;
     }
 
-    public boolean quickValidCheck(Material material) {
-        return blocks != null && blocks.isValid(material) != null;
-    }
-
     @Override
-    public String getKeyword() {
+    public String getKeyword()
+    {
         return "Through";
     }
 
     @Override
     @NotNull
-    public Through serialize(@NotNull SerializeData data) throws SerializerException {
+    public Through serialize(@NotNull SerializeData data) throws SerializerException
+    {
         ListHolder<Material> blocks = data.of("Blocks").serialize(new ListHolder<>(Material.class));
         ListHolder<EntityType> entities = data.of("Entities").serialize(new ListHolder<>(EntityType.class));
 
-        if (blocks == null && entities == null) {
+        if (blocks == null && entities == null)
+        {
             throw data.exception(null, "'Through' requires at least one of 'Blocks' or 'Entities'");
         }
 
@@ -96,10 +104,14 @@ public class Through implements Serializer<Through>, Cloneable {
     }
 
     @Override
-    public Through clone() {
-        try {
+    public Through clone()
+    {
+        try
+        {
             return (Through) super.clone();
-        } catch (CloneNotSupportedException e) {
+        }
+        catch (CloneNotSupportedException e)
+        {
             throw new AssertionError();
         }
     }

@@ -759,12 +759,7 @@ public class ShootHandler implements IValidator, TriggerListener
                 handData.setLastShotTime(System.currentTimeMillis());
                 handData.setLastWeaponShot(weaponTitle, weaponStack);
 
-                HashSet<String> weaponTitleOnDelay = this.weaponTitlesOnDelay.get(weaponTitleKey);
-                if (weaponTitleOnDelay == null)
-                {
-                    weaponTitleOnDelay = new HashSet();
-                    this.weaponTitlesOnDelay.put(weaponTitleKey, weaponTitleOnDelay);
-                }
+                HashSet<String> weaponTitleOnDelay = this.weaponTitlesOnDelay.computeIfAbsent(weaponTitleKey, k -> new HashSet<>());
                 weaponTitleOnDelay.add(weaponTitle);
                 int delayBetweenShots = config.getInt(weaponTitle + ".Shoot.Delay_Between_Shots") / 50;
                 new BukkitRunnable()

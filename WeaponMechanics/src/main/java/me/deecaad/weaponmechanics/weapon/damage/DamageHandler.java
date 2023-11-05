@@ -27,32 +27,34 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static me.deecaad.weaponmechanics.WeaponMechanics.*;
 
-public class DamageHandler {
+public class DamageHandler
+{
 
     private WeaponHandler weaponHandler;
 
-    public DamageHandler() {
+    public DamageHandler()
+    {
     }
 
-    public DamageHandler(WeaponHandler weaponHandler) {
+    public DamageHandler(WeaponHandler weaponHandler)
+    {
         this.weaponHandler = weaponHandler;
     }
 
     /**
      * @return false if damaging was cancelled
      */
-    public boolean tryUse(LivingEntity victim, WeaponProjectile projectile, double damage, DamagePoint point, boolean isBackstab) {
+    public boolean tryUse(LivingEntity victim, WeaponProjectile projectile, double damage, DamagePoint point, boolean isBackstab)
+    {
         return tryUse(victim, damage, point, isBackstab, projectile.getShooter(), projectile.getWeaponTitle(),
-                projectile.getWeaponStack(), projectile.getHand(), projectile.getDistanceTravelled());
+                      projectile.getWeaponStack(), projectile.getHand(), projectile.getDistanceTravelled());
     }
 
     public boolean tryUse(LivingEntity victim, double damage, DamagePoint point, boolean isBackstab,
-                          LivingEntity shooter, String weaponTitle, ItemStack weaponStack, EquipmentSlot slot, double distanceTravelled) {
+                          LivingEntity shooter, String weaponTitle, ItemStack weaponStack, EquipmentSlot slot, double distanceTravelled)
+    {
         return tryUse(victim, damage, point, isBackstab, shooter, weaponTitle, weaponStack, slot, distanceTravelled, false);
     }
 
@@ -60,7 +62,8 @@ public class DamageHandler {
      * @return false if damaging was cancelled
      */
     public boolean tryUse(LivingEntity victim, double damage, DamagePoint point, boolean isBackstab,
-                          LivingEntity shooter, String weaponTitle, ItemStack weaponStack, EquipmentSlot slot, double distanceTravelled, boolean isExplosion) {
+                          LivingEntity shooter, String weaponTitle, ItemStack weaponStack, EquipmentSlot slot, double distanceTravelled, boolean isExplosion)
+    {
         Configuration config = getConfigurations();
 
         if (!DamageUtil.canHarmScoreboardTeams(shooter, victim) && !config.getBool(weaponTitle + ".Damage.Ignore_Teams"))
@@ -80,21 +83,25 @@ public class DamageHandler {
 
         // Check for per-weapon damage modifier. Otherwise, use default
         DamageModifier damageModifier;
-        if (isExplosion) {
+        if (isExplosion)
+        {
             damageModifier = config.getObject(weaponTitle + ".Damage.Explosion.Damage_Modifiers", DamageModifier.class);
             if (damageModifier == null)
                 damageModifier = WeaponMechanics.getBasicConfigurations().getObject("Damage.Explosion.Damage_Modifiers", DamageModifier.class);
-        } else {
+        }
+        else
+        {
             damageModifier = config.getObject(weaponTitle + ".Damage.Damage_Modifiers", DamageModifier.class);
             if (damageModifier == null)
                 damageModifier = WeaponMechanics.getBasicConfigurations().getObject("Damage.Damage_Modifiers", DamageModifier.class);
         }
 
         // Make sure legacy-users have updated their config.yml file
-        if (damageModifier == null) {
+        if (damageModifier == null)
+        {
             debug.error("Could not find the default DamageModifiers... Are you using the outdated system?",
-                    "In WeaponMechanics-2.5.0, we added a new damage system. Check the patch notes for an easy copy-paste solution",
-                    "Your damage will not work until this is addressed");
+                        "In WeaponMechanics-2.5.0, we added a new damage system. Check the patch notes for an easy copy-paste solution",
+                        "Your damage will not work until this is addressed");
             return false;
         }
 
@@ -110,9 +117,9 @@ public class DamageHandler {
         Mechanics feetMechanics = config.getObject(weaponTitle + ".Damage.Feet.Mechanics", Mechanics.class);
 
         WeaponDamageEntityEvent damageEntityEvent = new WeaponDamageEntityEvent(weaponTitle, weaponStack, shooter, slot, victim,
-                damage, isBackstab, isCritical, point, armorDamage, fireTicks, isExplosion, distanceTravelled, damageModifier,
-                damageMechanics, killMechanics, backstabMechanics, criticalHitMechanics, headMechanics, bodyMechanics,
-                armsMechanics, legsMechanics, feetMechanics);
+                                                                                damage, isBackstab, isCritical, point, armorDamage, fireTicks, isExplosion, distanceTravelled, damageModifier,
+                                                                                damageMechanics, killMechanics, backstabMechanics, criticalHitMechanics, headMechanics, bodyMechanics,
+                                                                                armsMechanics, legsMechanics, feetMechanics);
         Bukkit.getPluginManager().callEvent(damageEntityEvent);
         if (damageEntityEvent.isCancelled())
             return false;
@@ -121,15 +128,16 @@ public class DamageHandler {
         point = damageEntityEvent.getPoint();
         double finalDamage = damageEntityEvent.getFinalDamage();
 
-        if(!noDamage)
+        if (!noDamage)
         {
             double absorption = CompatibilityAPI.getEntityCompatibility().getAbsorption(victim);
-            if(victim.getHealth() - (finalDamage - absorption) <= 0)
+            if (victim.getHealth() - (finalDamage - absorption) <= 0)
             {
                 Bukkit.getPluginManager().callEvent(new WeaponKillEntityEvent(weaponTitle, weaponStack, shooter, slot, victim, damageEntityEvent));
             }
 
-            if (DamageUtil.apply(shooter, victim, finalDamage)) {
+            if (DamageUtil.apply(shooter, victim, finalDamage, weaponTitle, point == DamagePoint.HEAD, isExplosion, weaponStack))
+            {
                 WeaponMechanics.debug.debug("Damage was cancelled");
 
                 // Damage was cancelled
@@ -137,12 +145,14 @@ public class DamageHandler {
             }
 
             // Don't do WM armor damage when using vanilla damaging
-            if (!getBasicConfigurations().getBool("Damage.Use_Vanilla_Damaging", false)) {
+            if (!getBasicConfigurations().getBool("Damage.Use_Vanilla_Damaging", false))
+            {
                 DamageUtil.damageArmor(victim, damageEntityEvent.getArmorDamage(), point);
             }
 
             // Fire ticks
-            if (fireTicks > 0) {
+            if (fireTicks > 0)
+            {
                 victim.setFireTicks(fireTicks);
             }
         }
@@ -159,16 +169,18 @@ public class DamageHandler {
         // On all damage
         if (damageEntityEvent.getDamageMechanics() != null)
             damageEntityEvent.getDamageMechanics().use(cast);
-        if (shooterData != null) {
+        if (shooterData != null)
+        {
             shooterData.add(weaponTitle, WeaponStat.TOTAL_DAMAGE, (float) finalDamage);
             shooterData.set(weaponTitle, WeaponStat.LONGEST_DISTANCE_HIT,
-                    (key, value) -> value == null ? (float) distanceTravelled : Math.max((float) value, (float) distanceTravelled));
+                            (key, value) -> value == null ? (float) distanceTravelled : Math.max((float) value, (float) distanceTravelled));
         }
         if (victimData != null)
             victimData.add(PlayerStat.DAMAGE_TAKEN, (float) finalDamage);
 
         boolean killed = false;
-        if (victim.isDead() || victim.getHealth() <= 0.0) {
+        if (victim.isDead() || victim.getHealth() <= 0.0)
+        {
             killed = true;
 
             if (damageEntityEvent.getKillMechanics() != null)
@@ -177,23 +189,32 @@ public class DamageHandler {
             if (victimData != null)
                 victimData.add(PlayerStat.WEAPON_DEATHS, 1);
 
-            if (shooterData != null) {
-                if (victim.getType() == EntityType.PLAYER) {
+            if (shooterData != null)
+            {
+                if (victim.getType() == EntityType.PLAYER)
+                {
                     shooterData.add(weaponTitle, WeaponStat.PLAYER_KILLS, 1);
-                } else {
+                }
+                else
+                {
                     shooterData.add(weaponTitle, WeaponStat.OTHER_KILLS, 1);
                 }
                 shooterData.set(weaponTitle, WeaponStat.LONGEST_DISTANCE_KILL,
-                        (key, value) -> value == null ? (float) distanceTravelled : Math.max((float) value, (float) distanceTravelled));
+                                (key, value) -> value == null ? (float) distanceTravelled : Math.max((float) value, (float) distanceTravelled));
             }
-        } else if (shooter.getType() == EntityType.PLAYER && getBasicConfigurations().getBool("Assists_Event.Enable", true)
-                && (!getBasicConfigurations().getBool("Assists_Event.Only_Players", true) || victim.getType() == EntityType.PLAYER)) {
+        }
+        else if (shooter.getType() == EntityType.PLAYER && getBasicConfigurations().getBool("Assists_Event.Enable", true)
+                && (!getBasicConfigurations().getBool("Assists_Event.Only_Players", true) || victim.getType() == EntityType.PLAYER))
+        {
 
             // If shot didn't kill entity, log assist damage
             AssistData assistData;
-            if (MetadataKey.ASSIST_DATA.has(victim)) {
+            if (MetadataKey.ASSIST_DATA.has(victim))
+            {
                 assistData = (AssistData) MetadataKey.ASSIST_DATA.get(victim).get(0).value();
-            } else {
+            }
+            else
+            {
                 MetadataKey.ASSIST_DATA.set(victim, assistData = new AssistData());
             }
             assistData.logDamage((Player) shooter, weaponTitle, weaponStack, finalDamage);
@@ -201,30 +222,36 @@ public class DamageHandler {
         }
 
         // On backstab
-        if (damageEntityEvent.isBackstab()) {
+        if (damageEntityEvent.isBackstab())
+        {
             if (damageEntityEvent.getBackstabMechanics() != null)
                 damageEntityEvent.getBackstabMechanics().use(cast);
 
-            if (shooterData != null) {
+            if (shooterData != null)
+            {
                 shooterData.add(weaponTitle, WeaponStat.BACKSTABS, 1);
                 if (killed) shooterData.add(weaponTitle, WeaponStat.BACKSTAB_KILLS, 1);
             }
         }
 
         // On critical
-        if (damageEntityEvent.isCritical()) {
+        if (damageEntityEvent.isCritical())
+        {
             if (damageEntityEvent.getCriticalHitMechanics() != null)
                 damageEntityEvent.getCriticalHitMechanics().use(cast);
 
-            if (shooterData != null) {
+            if (shooterData != null)
+            {
                 shooterData.add(weaponTitle, WeaponStat.CRITICAL_HITS, 1);
                 if (killed) shooterData.add(weaponTitle, WeaponStat.CRITICAL_KILLS, 1);
             }
         }
 
         // On point
-        if (point != null) {
-            Mechanics mechanics = switch (point) {
+        if (point != null)
+        {
+            Mechanics mechanics = switch (point)
+            {
                 case HEAD -> damageEntityEvent.getHeadMechanics();
                 case BODY -> damageEntityEvent.getBodyMechanics();
                 case ARMS -> damageEntityEvent.getArmsMechanics();
@@ -234,25 +261,32 @@ public class DamageHandler {
             if (mechanics != null)
                 mechanics.use(cast);
 
-            if (shooterData != null) {
-                switch (point) {
-                    case HEAD -> {
+            if (shooterData != null)
+            {
+                switch (point)
+                {
+                    case HEAD ->
+                    {
                         shooterData.add(weaponTitle, WeaponStat.HEAD_HITS, 1);
                         if (killed) shooterData.add(weaponTitle, WeaponStat.HEAD_KILLS, 1);
                     }
-                    case BODY -> {
+                    case BODY ->
+                    {
                         shooterData.add(weaponTitle, WeaponStat.BODY_HITS, 1);
                         if (killed) shooterData.add(weaponTitle, WeaponStat.BODY_KILLS, 1);
                     }
-                    case ARMS -> {
+                    case ARMS ->
+                    {
                         shooterData.add(weaponTitle, WeaponStat.ARM_HITS, 1);
                         if (killed) shooterData.add(weaponTitle, WeaponStat.ARM_KILLS, 1);
                     }
-                    case LEGS -> {
+                    case LEGS ->
+                    {
                         shooterData.add(weaponTitle, WeaponStat.LEG_HITS, 1);
                         if (killed) shooterData.add(weaponTitle, WeaponStat.LEG_KILLS, 1);
                     }
-                    case FEET -> {
+                    case FEET ->
+                    {
                         shooterData.add(weaponTitle, WeaponStat.FOOT_HITS, 1);
                         if (killed) shooterData.add(weaponTitle, WeaponStat.FOOT_KILLS, 1);
                     }
@@ -263,17 +297,20 @@ public class DamageHandler {
         return true;
     }
 
-    public void tryUseExplosion(WeaponProjectile projectile, Location origin, DoubleMap<LivingEntity> exposures) {
+    public void tryUseExplosion(WeaponProjectile projectile, Location origin, DoubleMap<LivingEntity> exposures)
+    {
         Configuration config = getConfigurations();
 
         String weaponTitle = projectile.getWeaponTitle();
         double damage = config.getDouble(weaponTitle + ".Damage.Base_Explosion_Damage");
-        if (damage == 0) {
+        if (damage == 0)
+        {
             // If explosion damage isn't used, use Base_Damage
             damage = config.getDouble(weaponTitle + ".Damage.Base_Damage") * projectile.getProjectileSettings().getDamageMultiplier().doubleValue();
         }
 
-        for (DoubleEntry<LivingEntity> entry : exposures.entrySet()) {
+        for (DoubleEntry<LivingEntity> entry : exposures.entrySet())
+        {
             // Value = exposure
 
             LivingEntity victim = entry.getKey();

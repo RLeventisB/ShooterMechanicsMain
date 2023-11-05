@@ -31,7 +31,8 @@ import org.bukkit.util.Vector;
 import static me.deecaad.weaponmechanics.WeaponMechanics.debug;
 import static me.deecaad.weaponmechanics.WeaponMechanics.getConfigurations;
 
-public class HitHandler {
+public class HitHandler
+{
 
     /**
      * Simple final modifier for front hit adjusting.
@@ -41,21 +42,24 @@ public class HitHandler {
 
     private WeaponHandler weaponHandler;
 
-    public HitHandler(WeaponHandler weaponHandler) {
+    public HitHandler(WeaponHandler weaponHandler)
+    {
         this.weaponHandler = weaponHandler;
     }
 
     /**
-     * @param result the ray trace result used
+     * @param result     the ray trace result used
      * @param projectile the projectile which caused hit
      * @return true if hit was cancelled
      */
-    public boolean handleHit(RayTraceResult result, WeaponProjectile projectile) {
+    public boolean handleHit(RayTraceResult result, WeaponProjectile projectile)
+    {
         if (result instanceof BlockTraceResult blockHit)
         {
             Vector normal = result.getHitFace().getDirection();
             Explosion explosion = WeaponMechanics.getConfigurations().getObject(projectile.getWeaponTitle() + ".Explosion", Explosion.class);
-            if (explosion != null && explosion.getDetonation().getTriggers().contains(ExplosionTrigger.FLOOR) && normal.getX() == 0.0 && normal.getY() == 1.0 && normal.getZ() == 0.0) {
+            if (explosion != null && explosion.getDetonation().getTriggers().contains(ExplosionTrigger.FLOOR) && normal.getX() == 0.0 && normal.getY() == 1.0 && normal.getZ() == 0.0)
+            {
                 return this.handleFloorHit(blockHit, projectile, explosion);
             }
             return handleBlockHit(blockHit, projectile);
@@ -72,14 +76,17 @@ public class HitHandler {
     /**
      * @return true if hit was cancelled
      */
-    public boolean handleMeleeHit(EntityTraceResult result, LivingEntity shooter, Vector shooterDirection, String weaponTitle, ItemStack weaponStack, EquipmentSlot slot) {
+    public boolean handleMeleeHit(EntityTraceResult result, LivingEntity shooter, Vector shooterDirection, String weaponTitle, ItemStack weaponStack, EquipmentSlot slot)
+    {
         // Handle worldguard flags
         WorldGuardCompatibility worldGuard = CompatibilityAPI.getWorldGuardCompatibility();
         Location loc = result.getHitLocation().clone().toLocation(shooter.getWorld());
 
-        if (!worldGuard.testFlag(loc, shooter instanceof Player ? (Player) shooter : null, "weapon-damage")) { // is cancelled check
+        if (!worldGuard.testFlag(loc, shooter instanceof Player ? (Player) shooter : null, "weapon-damage"))
+        { // is cancelled check
             Object obj = worldGuard.getValue(loc, "weapon-damage-message");
-            if (obj != null && !obj.toString().isEmpty() && shooter != null) {
+            if (obj != null && !obj.toString().isEmpty() && shooter != null)
+            {
                 shooter.sendMessage(StringUtil.color(obj.toString()));
             }
             return true;
@@ -95,7 +102,8 @@ public class HitHandler {
         if (event.isCancelled())
             return true;
 
-        if (event.getMeleeHitDelay() != 0) {
+        if (event.getMeleeHitDelay() != 0)
+        {
             EntityWrapper wrapper = WeaponMechanics.getEntityWrapper(shooter);
             HandData hand = wrapper.getMainHandData(); // always mainhand for melee
 
@@ -103,41 +111,49 @@ public class HitHandler {
         }
 
         return !weaponHandler.getDamageHandler().tryUse(livingEntity, getConfigurations().getDouble(weaponTitle + ".Damage.Base_Damage"),
-                getDamagePoint(result, shooterDirection), backstab, shooter, weaponTitle, weaponStack, slot, result.getHitMinClamped());
+                                                        getDamagePoint(result, shooterDirection), backstab, shooter, weaponTitle, weaponStack, slot, result.getHitMinClamped());
     }
 
-    private boolean handleBlockHit(BlockTraceResult result, WeaponProjectile projectile) {
+    public boolean handleBlockHit(BlockTraceResult result, WeaponProjectile projectile)
+    {
         ProjectileHitBlockEvent hitBlockEvent = new ProjectileHitBlockEvent(projectile, result.getBlock(), result.getHitFace(), result.getHitLocation().clone());
         Bukkit.getPluginManager().callEvent(hitBlockEvent);
         if (hitBlockEvent.isCancelled()) return true;
 
         Explosion explosion = getConfigurations().getObject(projectile.getWeaponTitle() + ".Explosion", Explosion.class);
-        if (explosion != null) explosion.handleExplosion(projectile.getShooter(), result.getHitLocation().clone().toLocation(projectile.getWorld()), projectile, ExplosionTrigger.BLOCK);
+        if (explosion != null)
+            explosion.handleExplosion(projectile.getShooter(), result.getHitLocation().clone().toLocation(projectile.getWorld()), projectile, ExplosionTrigger.BLOCK);
 
         return false;
     }
 
-    private boolean handleFloorHit(BlockTraceResult result, WeaponProjectile projectile, Explosion explosion) {
+    public boolean handleFloorHit(BlockTraceResult result, WeaponProjectile projectile, Explosion explosion)
+    {
         ProjectileHitBlockEvent hitBlockEvent = new ProjectileHitBlockEvent(projectile, result.getBlock(), result.getHitFace(), result.getHitLocation().clone());
         Bukkit.getPluginManager().callEvent(hitBlockEvent);
-        if (hitBlockEvent.isCancelled()) {
+        if (hitBlockEvent.isCancelled())
+        {
             return true;
         }
-        if (explosion != null) {
+        if (explosion != null)
+        {
             explosion.handleExplosion(projectile.getShooter(), result.getHitLocation().clone().toLocation(projectile.getWorld()), projectile, ExplosionTrigger.FLOOR);
         }
         return false;
     }
 
-    private boolean handleEntityHit(EntityTraceResult result, WeaponProjectile projectile) {
+    public boolean handleEntityHit(EntityTraceResult result, WeaponProjectile projectile)
+    {
         // Handle worldguard flags
         WorldGuardCompatibility worldGuard = CompatibilityAPI.getWorldGuardCompatibility();
         Location loc = result.getHitLocation().toLocation(projectile.getWorld());
         LivingEntity shooter = projectile.getShooter();
 
-        if (!worldGuard.testFlag(loc, shooter instanceof Player ? (Player) shooter : null, "weapon-damage")) { // is cancelled check
+        if (!worldGuard.testFlag(loc, shooter instanceof Player ? (Player) shooter : null, "weapon-damage"))
+        { // is cancelled check
             Object obj = worldGuard.getValue(loc, "weapon-damage-message");
-            if (obj != null && !obj.toString().isEmpty() && shooter != null) {
+            if (obj != null && !obj.toString().isEmpty() && shooter != null)
+            {
                 shooter.sendMessage(StringUtil.color(obj.toString()));
             }
             return true;
@@ -155,23 +171,26 @@ public class HitHandler {
         hitPoint = hitEntityEvent.getPoint();
         backstab = hitEntityEvent.isBackStab();
 
-        if (!weaponHandler.getDamageHandler().tryUse(livingEntity, projectile, getConfigurations().getDouble(projectile.getWeaponTitle() + ".Damage.Base_Damage") * projectile.getProjectileSettings().getDamageMultiplier().doubleValue(), hitPoint, backstab)) {
+        if (!weaponHandler.getDamageHandler().tryUse(livingEntity, projectile, getConfigurations().getDouble(projectile.getWeaponTitle() + ".Damage.Base_Damage") * projectile.getProjectileSettings().getDamageMultiplier().doubleValue(), hitPoint, backstab))
+        {
             // Damage was cancelled
             return true;
         }
 
         Explosion explosion = getConfigurations().getObject(projectile.getWeaponTitle() + ".Explosion", Explosion.class);
-        if (explosion != null) explosion.handleExplosion(projectile.getShooter(), result.getHitLocation().clone().toLocation(projectile.getWorld()), projectile, ExplosionTrigger.ENTITY);
+        if (explosion != null)
+            explosion.handleExplosion(projectile.getShooter(), result.getHitLocation().clone().toLocation(projectile.getWorld()), projectile, ExplosionTrigger.ENTITY);
 
         return false;
     }
 
     /**
-     * @param result the hit result
+     * @param result           the hit result
      * @param normalizedMotion the normalized direction
      * @return the damage point or null if tried to cast when living entity was not defined
      */
-    private DamagePoint getDamagePoint(EntityTraceResult result, Vector normalizedMotion) {
+    public DamagePoint getDamagePoint(EntityTraceResult result, Vector normalizedMotion)
+    {
         LivingEntity livingEntity = result.getEntity();
         Configuration basicConfiguration = WeaponMechanics.getBasicConfigurations();
 
@@ -185,25 +204,30 @@ public class HitHandler {
 
         // Check HEAD
         double head = basicConfiguration.getDouble("Entity_Hitboxes." + type.name() + "." + DamagePoint.HEAD.name());
-        if (head > 0.0 && maxY - (entityHeight * head) < hitY) {
+        if (head > 0.0 && maxY - (entityHeight * head) < hitY)
+        {
             return DamagePoint.HEAD;
         }
 
         // Check BODY
         double body = basicConfiguration.getDouble("Entity_Hitboxes." + type.name() + "." + DamagePoint.BODY.name());
-        if (body >= 1.0 || body > 0.0 && maxY - (entityHeight * (head + body)) < hitY) {
+        if (body >= 1.0 || body > 0.0 && maxY - (entityHeight * (head + body)) < hitY)
+        {
 
             boolean horizontalEntity = basicConfiguration.getBool("Entity_Hitboxes." + type.name() + ".Horizontal_Entity", false);
             boolean arms = basicConfiguration.getBool("Entity_Hitboxes." + type.name() + "." + DamagePoint.ARMS.name(), false);
-            if (horizontalEntity || arms) {
+            if (horizontalEntity || arms)
+            {
                 Vector normalizedEntityDirection = livingEntity.getLocation().getDirection();
 
-                if (horizontalEntity && !hitBox.cloneDimensions().expand(normalizedEntityDirection, FRONT_HIT).collides(result.getHitLocation())) {
+                if (horizontalEntity && !hitBox.cloneDimensions().expand(normalizedEntityDirection, FRONT_HIT).collides(result.getHitLocation()))
+                {
                     // Basically removes directionally 0.2 from this entity hitbox and check if the hit location is still in the hitbox
                     return DamagePoint.HEAD;
                 }
 
-                if (arms && Math.abs(normalizedMotion.clone().setY(0).dot(normalizedEntityDirection.setY(0))) < 0.5) {
+                if (arms && Math.abs(normalizedMotion.clone().setY(0).dot(normalizedEntityDirection.setY(0))) < 0.5)
+                {
                     return DamagePoint.ARMS;
                 }
             }
@@ -213,19 +237,21 @@ public class HitHandler {
 
         // Check LEGS
         double legs = basicConfiguration.getDouble("Entity_Hitboxes." + type.name() + "." + DamagePoint.LEGS.name());
-        if (legs > 0.0 && maxY - (entityHeight * (head + body + legs)) < hitY) {
+        if (legs > 0.0 && maxY - (entityHeight * (head + body + legs)) < hitY)
+        {
             return DamagePoint.LEGS;
         }
 
         // Check FEET
         double feet = basicConfiguration.getDouble("Entity_Hitboxes." + type.name() + "." + DamagePoint.FEET.name());
-        if (feet > 0.0) { // No need for actual check since it can't be HEAD, BODY or LEGS anymore so only option left is FEET
+        if (feet > 0.0)
+        { // No need for actual check since it can't be HEAD, BODY or LEGS anymore so only option left is FEET
             return DamagePoint.FEET;
         }
 
         debug.log(LogLevel.WARN, "Something unexpected happened and HEAD, BODY, LEGS or FEET wasn't valid",
-                "This should never happen. Using BODY as default value...",
-                "This happened with entity type " + type + ".");
+                  "This should never happen. Using BODY as default value...",
+                  "This happened with entity type " + type + ".");
         return DamagePoint.BODY;
     }
 }

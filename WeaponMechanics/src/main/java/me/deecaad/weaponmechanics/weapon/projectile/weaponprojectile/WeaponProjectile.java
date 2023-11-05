@@ -20,7 +20,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class WeaponProjectile extends AProjectile {
+public class WeaponProjectile extends AProjectile
+{
 
     // These may be modified by WMP. We have booleans to check if a new copy
     // was made of these variables.
@@ -53,7 +54,8 @@ public class WeaponProjectile extends AProjectile {
 
     public WeaponProjectile(ProjectileSettings projectileSettings, LivingEntity shooter, Location location,
                             Vector motion, ItemStack weaponStack, String weaponTitle, EquipmentSlot hand,
-                            Sticky sticky, Through through, Bouncy bouncy) {
+                            Sticky sticky, Through through, Bouncy bouncy)
+    {
         super(shooter, location, motion);
 
         this.projectileSettings = projectileSettings;
@@ -65,18 +67,21 @@ public class WeaponProjectile extends AProjectile {
         this.weaponTitle = weaponTitle;
         this.hand = hand;
 
-        if (projectileSettings.isDisableEntityCollisions()) {
+        if (projectileSettings.isDisableEntityCollisions())
+        {
             this.rayTrace = new RayTrace()
                     .withBlockFilter(this::equalToLastHit)
                     .disableEntityChecks()
                     .enableLiquidChecks()
                     .withRaySize(projectileSettings.getSize());
-        } else {
+        }
+        else
+        {
             this.rayTrace = new RayTrace()
                     .withBlockFilter(this::equalToLastHit)
                     .withEntityFilter(entity -> equalToLastHit(entity)
-                                    || (getShooter() != null && getAliveTicks() < 10 && entity.getEntityId() == getShooter().getEntityId())
-                                    || entity.getPassengers().contains(getShooter()))
+                            || (getShooter() != null && getAliveTicks() < 10 && entity.getEntityId() == getShooter().getEntityId())
+                            || entity.getPassengers().contains(getShooter()))
                     .enableLiquidChecks()
                     .withRaySize(projectileSettings.getSize());
         }
@@ -86,14 +91,16 @@ public class WeaponProjectile extends AProjectile {
      * Clones the settings of this weapon projectile without shooting it
      *
      * @param location the cloned projectile's new start location
-     * @param motion the cloned projectile's new motion
+     * @param motion   the cloned projectile's new motion
      * @return the cloned projectile
      */
-    public WeaponProjectile clone(Location location, Vector motion) {
+    public WeaponProjectile clone(Location location, Vector motion)
+    {
         return new WeaponProjectile(projectileSettings, getShooter(), location, motion, weaponStack, weaponTitle, hand, sticky, through, bouncy);
     }
 
-    public ProjectileSettings getProjectileSettings() {
+    public ProjectileSettings getProjectileSettings()
+    {
         if (isProjectileSettingsChanged)
             return projectileSettings;
 
@@ -102,17 +109,20 @@ public class WeaponProjectile extends AProjectile {
         return projectileSettings;
     }
 
-    public void setProjectileSettings(@NotNull ProjectileSettings projectileSettings) {
+    public void setProjectileSettings(@NotNull ProjectileSettings projectileSettings)
+    {
         this.projectileSettings = projectileSettings;
         isProjectileSettingsChanged = true;
     }
 
     @Override
-    public void onAdd() {
+    public void onAdd()
+    {
         this.projectileSettings.setGravityDelayTicks(this.projectileSettings.getGravityDelayTicks());
         this.projectileSettings.setDragDelayTicks(this.projectileSettings.getDragDelayTicks());
     }
-    public @Nullable Sticky getSticky() {
+    public @Nullable Sticky getSticky()
+    {
         if (isStickyChanged || sticky == null)
             return sticky;
 
@@ -121,7 +131,8 @@ public class WeaponProjectile extends AProjectile {
         return sticky;
     }
 
-    public void setSticky(@Nullable Sticky sticky) {
+    public void setSticky(@Nullable Sticky sticky)
+    {
         setSticky(sticky, true);
     }
 
@@ -134,12 +145,14 @@ public class WeaponProjectile extends AProjectile {
      * @param sticky          The nullable sticky instance.
      * @param isStickyChanged true if sticky is mutable.
      */
-    public void setSticky(@Nullable Sticky sticky, boolean isStickyChanged) {
+    public void setSticky(@Nullable Sticky sticky, boolean isStickyChanged)
+    {
         this.sticky = sticky;
         this.isStickyChanged = isStickyChanged;
     }
 
-    public @Nullable Through getThrough() {
+    public @Nullable Through getThrough()
+    {
         if (isThroughChanged || through == null)
             return through;
 
@@ -149,7 +162,8 @@ public class WeaponProjectile extends AProjectile {
     }
 
 
-    public void setThrough(@Nullable Through through) {
+    public void setThrough(@Nullable Through through)
+    {
         setThrough(through, true);
     }
 
@@ -162,12 +176,14 @@ public class WeaponProjectile extends AProjectile {
      * @param through          The nullable through instance.
      * @param isThroughChanged true if through is mutable.
      */
-    public void setThrough(@Nullable Through through, boolean isThroughChanged) {
+    public void setThrough(@Nullable Through through, boolean isThroughChanged)
+    {
         this.through = through;
         this.isThroughChanged = isThroughChanged;
     }
 
-    public @Nullable Bouncy getBouncy() {
+    public @Nullable Bouncy getBouncy()
+    {
         if (isBouncyChanged || bouncy == null)
             return bouncy;
 
@@ -176,7 +192,8 @@ public class WeaponProjectile extends AProjectile {
         return bouncy;
     }
 
-    public void setBouncy(@Nullable Bouncy bouncy) {
+    public void setBouncy(@Nullable Bouncy bouncy)
+    {
         setBouncy(bouncy, true);
     }
 
@@ -189,54 +206,64 @@ public class WeaponProjectile extends AProjectile {
      * @param bouncy          The nullable bouncy instance.
      * @param isBouncyChanged true if bouncy is mutable.
      */
-    public void setBouncy(@Nullable Bouncy bouncy, boolean isBouncyChanged) {
+    public void setBouncy(@Nullable Bouncy bouncy, boolean isBouncyChanged)
+    {
         this.bouncy = bouncy;
         this.isBouncyChanged = isBouncyChanged;
     }
 
     @Override
-    public boolean isDragOnlyHorizontal() {
+    public boolean isDragOnlyHorizontal()
+    {
         return this.projectileSettings.isDragHorizontal();
     }
 
     @Override
-    public boolean isYCappedOnHorizontalDrag() {
+    public boolean isYCappedOnHorizontalDrag()
+    {
         return this.projectileSettings.isYCappedOnHorizontalDrag();
     }
 
     @Override
-    public boolean isPositiveYDraggedWhenDragIsHorizontal() {
+    public boolean isPositiveYDraggedWhenDragIsHorizontal()
+    {
         return this.projectileSettings.isPositiveYDraggedWhenDragIsHorizontal();
     }
     @Override
-    public double getGravity() {
+    public double getGravity()
+    {
         return rolling || stickedData != null || this.getAliveTicks() < this.projectileSettings.getGravityDelayTicks() ? 0.0 : this.projectileSettings.getGravity();
     }
 
     @Override
-    public double getMinimumSpeed() {
+    public double getMinimumSpeed()
+    {
         return projectileSettings.getMinimumSpeed();
     }
 
     @Override
-    public boolean isRemoveAtMinimumSpeed() {
+    public boolean isRemoveAtMinimumSpeed()
+    {
         return projectileSettings.isRemoveAtMinimumSpeed();
     }
 
     @Override
-    public double getMaximumSpeed() {
+    public double getMaximumSpeed()
+    {
         return projectileSettings.getMaximumSpeed();
     }
 
     @Override
-    public boolean isRemoveAtMaximumSpeed() {
+    public boolean isRemoveAtMaximumSpeed()
+    {
         return projectileSettings.isRemoveAtMaximumSpeed();
     }
 
     @Override
     public double getDrag()
     {
-        if (this.getAliveTicks() < this.projectileSettings.getDragDelayTicks()) {
+        if (this.getAliveTicks() < this.projectileSettings.getDragDelayTicks())
+        {
             return 1.0;
         }
         if (getCurrentBlock().isLiquid())
@@ -248,11 +275,13 @@ public class WeaponProjectile extends AProjectile {
     }
 
     @Override
-    public int getMaximumAliveTicks() {
+    public int getMaximumAliveTicks()
+    {
         return projectileSettings.getMaximumAliveTicks();
     }
 
-    public boolean hasTravelledMaximumDistance() {
+    public boolean hasTravelledMaximumDistance()
+    {
         double maximum = projectileSettings.getMaximumTravelDistance();
         return maximum != -1 && getDistanceTravelled() >= maximum;
     }
@@ -263,14 +292,16 @@ public class WeaponProjectile extends AProjectile {
      * @return the item stack used to shoot this projectile
      */
     @Nullable
-    public ItemStack getWeaponStack() {
+    public ItemStack getWeaponStack()
+    {
         return weaponStack;
     }
 
     /**
      * @return the weapon title used to shoot this projectile
      */
-    public String getWeaponTitle() {
+    public String getWeaponTitle()
+    {
         return weaponTitle;
     }
 
@@ -279,14 +310,16 @@ public class WeaponProjectile extends AProjectile {
      *
      * @return the hand used to shoot this projectile.
      */
-    public EquipmentSlot getHand() {
+    public EquipmentSlot getHand()
+    {
         return hand;
     }
 
     /**
      * @return the sticked data if this projectile is sticked to some entity or block
      */
-    public StickedData getStickedData() {
+    public StickedData getStickedData()
+    {
         return stickedData;
     }
 
@@ -295,8 +328,10 @@ public class WeaponProjectile extends AProjectile {
      *
      * @param stickedData the new sticked data
      */
-    public void setStickedData(StickedData stickedData) {
-        if (stickedData == null) {
+    public void setStickedData(StickedData stickedData)
+    {
+        if (stickedData == null)
+        {
             this.stickedData = null;
             // This basically removes sticky
             setMotion(new Vector(
@@ -308,11 +343,15 @@ public class WeaponProjectile extends AProjectile {
         }
 
         // Just extra check if entity happens to die or block disappear
-        if (stickedData.isBlockStick()) {
-            if (stickedData.getBlock() == null) {
+        if (stickedData.isBlockStick())
+        {
+            if (stickedData.getBlock() == null)
+            {
                 return;
             }
-        } else if (stickedData.getLivingEntity() == null) {
+        }
+        else if (stickedData.getLivingEntity() == null)
+        {
             return;
         }
 
@@ -326,14 +365,16 @@ public class WeaponProjectile extends AProjectile {
     /**
      * @return the amount of hit boxes this projectile has gone through using through feature
      */
-    public double getThroughAmount() {
+    public double getThroughAmount()
+    {
         return throughAmount;
     }
 
     /**
      * @return the amount of hit boxes this projectile has bounced off using bouncy feature
      */
-    public int getBounces() {
+    public int getBounces()
+    {
         return bounces;
     }
 
@@ -342,7 +383,8 @@ public class WeaponProjectile extends AProjectile {
      *
      * @param rolling the new rolling state
      */
-    public void setRolling(boolean rolling) {
+    public void setRolling(boolean rolling)
+    {
         if (bouncy == null) return;
 
         this.rolling = rolling;
@@ -351,25 +393,32 @@ public class WeaponProjectile extends AProjectile {
     /**
      * @return whether projectile is currently rolling
      */
-    public boolean isRolling() {
+    public boolean isRolling()
+    {
         return rolling;
     }
 
     @Override
-    public boolean updatePosition() {
+    public boolean updatePosition()
+    {
 
         Vector possibleNextLocation = getLocation().add(getMotion());
-        if (!getWorld().isChunkLoaded(possibleNextLocation.getBlockX() >> 4, possibleNextLocation.getBlockZ() >> 4)) {
+        if (!getWorld().isChunkLoaded(possibleNextLocation.getBlockX() >> 4, possibleNextLocation.getBlockZ() >> 4))
+        {
             // Remove projectile if next location would be in unloaded chunk
             return true;
         }
 
-        if (stickedData != null) {
+        if (stickedData != null)
+        {
             Vector newLocation = stickedData.getNewLocation();
-            if (newLocation == null) {
+            if (newLocation == null)
+            {
                 // If this happens, either entity is dead or block isn't there anymore
                 setStickedData(null);
-            } else if (!stickedData.isBlockStick()) {
+            }
+            else if (!stickedData.isBlockStick())
+            {
                 // Update location and update distance travelled if living entity
                 setRawLocation(newLocation);
                 addDistanceTravelled(getLastLocation().distance(newLocation));
@@ -384,8 +433,9 @@ public class WeaponProjectile extends AProjectile {
         // Returns sorted list of hits
 
         List<RayTraceResult> hits = rayTrace.cast(getWorld(), getLocation(), possibleNextLocation, getNormalizedMotion(),
-                through == null ? 0.0 : through.getMaximumThroughAmount());
-        if (hits == null) {
+                                                  through == null ? 0.0 : through.getMaximumThroughAmount());
+        if (hits == null)
+        {
 
             // Check if can't keep rolling
             if (isRolling() && bouncy.checkForRollingCancel(this)) return true;
@@ -399,14 +449,16 @@ public class WeaponProjectile extends AProjectile {
 
         double distanceAlreadyAdded = 0;
 
-        for (RayTraceResult hit : hits) {
+        for (RayTraceResult hit : hits)
+        {
 
             // Stay on track of current location and distance travelled on each loop
             setRawLocation(hit.getHitLocation());
             double add = hit.getHitMinClamped() - distanceAlreadyAdded;
             addDistanceTravelled(distanceAlreadyAdded += add);
 
-            if (hasTravelledMaximumDistance()) {
+            if (hasTravelledMaximumDistance())
+            {
                 // Kill projectile since it can't go this far
                 return true;
             }
@@ -414,7 +466,8 @@ public class WeaponProjectile extends AProjectile {
             onCollide(hit);
 
             // We only want to let onCollide to be called onLiquid hits
-            if (hit instanceof BlockTraceResult blockHit && blockHit.getBlock().isLiquid()) {
+            if (hit instanceof BlockTraceResult blockHit && blockHit.getBlock().isLiquid())
+            {
                 continue;
             }
 
@@ -422,13 +475,15 @@ public class WeaponProjectile extends AProjectile {
             if (WeaponMechanics.getWeaponHandler().getHitHandler().handleHit(hit, this)) continue;
 
             // Sticky
-            if (sticky != null && sticky.handleSticking(this, hit)) {
+            if (sticky != null && sticky.handleSticking(this, hit))
+            {
                 // Break since projectile sticked to entity or block
                 return false;
             }
 
             // Through
-            if (through != null && through.handleThrough(this, hit)) {
+            if (through != null && through.handleThrough(this, hit))
+            {
                 // Continue since projectile went through.
                 // We still need to check that other collisions also allows this
                 throughAmount += hit.getThroughDistance();
@@ -439,15 +494,19 @@ public class WeaponProjectile extends AProjectile {
             }
 
             // Bouncy and rolling
-            if (bouncy != null) {
+            if (bouncy != null)
+            {
 
                 // We want to check that projectile isn't already rolling
                 // If it is already rolling we want to allow bouncing against hits
-                if (!isRolling() && getMotionLength() < bouncy.getRequiredMotionToStartRollingOrDie()) {
+                if (!isRolling() && getMotionLength() < bouncy.getRequiredMotionToStartRollingOrDie())
+                {
 
                     // Returns true if projectile should die, false otherwise
                     return !(hit instanceof BlockTraceResult blockHit) || !bouncy.handleRolling(this, blockHit.getBlock());
-                } else if (bouncy.handleBounce(this, hit)) {
+                }
+                else if (bouncy.handleBounce(this, hit))
+                {
                     // Break since projectile bounced to different direction
                     ++bounces;
 
@@ -469,7 +528,8 @@ public class WeaponProjectile extends AProjectile {
         return hasTravelledMaximumDistance();
     }
 
-    private void updateLastHit(RayTraceResult hit) {
+    private void updateLastHit(RayTraceResult hit)
+    {
         // Logic of +1 for last update tick:
 
         // Current alive tick is 5 in this case
@@ -489,28 +549,34 @@ public class WeaponProjectile extends AProjectile {
         // 7 <= 6 = FALSE
         // -> equalToLastHit is false even if the hit entity / block is same
 
-        if (hit instanceof BlockTraceResult blockHit) {
+        if (hit instanceof BlockTraceResult blockHit)
+        {
             lastBlock = blockHit.getBlock().getLocation();
             lastBlockUpdateTick = getAliveTicks() + 1;
-        } else if (hit instanceof EntityTraceResult entityHit) {
+        }
+        else if (hit instanceof EntityTraceResult entityHit)
+        {
             lastEntity = entityHit.getEntity().getEntityId();
             lastEntityUpdateTick = getAliveTicks() + 1;
         }
     }
 
-    private boolean equalToLastHit(Block hit) {
+    private boolean equalToLastHit(Block hit)
+    {
         Location hitBlock = hit.getLocation();
         return lastBlock != null && lastBlock.getBlockX() == hitBlock.getBlockX() && lastBlock.getBlockY() == hitBlock.getBlockY() && lastBlock.getBlockZ() == hitBlock.getBlockZ() // Check block
                 && getAliveTicks() <= lastBlockUpdateTick; // Check hit tick
     }
 
-    private boolean equalToLastHit(LivingEntity entity) {
+    private boolean equalToLastHit(LivingEntity entity)
+    {
         return lastEntity != -1 && lastEntity == entity.getEntityId() // Check entity
                 && getAliveTicks() <= lastEntityUpdateTick; // Check hit tick
     }
 
     @Override
-    public void onEnd() {
+    public void onEnd()
+    {
         super.onEnd();
         Bukkit.getPluginManager().callEvent(new ProjectileEndEvent(this));
     }
