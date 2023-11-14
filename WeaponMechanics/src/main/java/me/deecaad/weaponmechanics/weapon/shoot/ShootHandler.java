@@ -86,26 +86,26 @@ public class ShootHandler implements IValidator, TriggerListener
      * TODO Switch from int -> boolean for 1.6kb -> 400bits of ram
      */
     private static final int[][] AUTO = new int[][]{
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // 1 perfect
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // 2 perfect
-        {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}, // 4 perfect
-        {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0}, // 5 perfect
-        {1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0},
-        {1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0},
-        {1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0},
-        {1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0},
-        {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0}, // 10 perfect
-        {1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0},
-        {1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0},
-        {1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0},
-        {1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0},
-        {1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0}, // 15 good
-        {1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0}, // 16 good
-        {1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0},
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0}, // 18 good
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0}, // 19 good
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}  // 20 good
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // 1 perfect
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0}, // 2 perfect
+    {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0}, // 4 perfect
+    {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0}, // 5 perfect
+    {1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0},
+    {1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0},
+    {1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0},
+    {1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0},
+    {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0}, // 10 perfect
+    {1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0},
+    {1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0},
+    {1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0},
+    {1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0},
+    {1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0}, // 15 good
+    {1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0}, // 16 good
+    {1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0},
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0}, // 18 good
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0}, // 19 good
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}  // 20 good
     };
 
     public ShootHandler()
@@ -157,7 +157,7 @@ public class ShootHandler implements IValidator, TriggerListener
             weaponTitle = modifier.ModifyWeaponTitleIfValid(entityWrapper, weaponTitle, slot, triggerType);
         }
 
-        WeaponPreShootEvent preShootEvent = new WeaponPreShootEvent(weaponTitle, weaponStack, entityWrapper.getEntity(), slot);
+        WeaponPreShootEvent preShootEvent = new WeaponPreShootEvent(weaponTitle, weaponStack, entityWrapper.getEntity(), slot, triggerType);
         Bukkit.getPluginManager().callEvent(preShootEvent);
         if (preShootEvent.isCancelled()) return false;
 
@@ -304,15 +304,15 @@ public class ShootHandler implements IValidator, TriggerListener
             {
                 case BURST -> burstShot(entityWrapper, weaponTitle, weaponStack, handData, slot, dualWield);
                 case AUTO ->
-                    fullAutoShot(entityWrapper, weaponTitle, weaponStack, handData, slot, triggerType, dualWield);
+                fullAutoShot(entityWrapper, weaponTitle, weaponStack, handData, slot, triggerType, dualWield);
                 default -> singleShot(entityWrapper, weaponTitle, weaponStack, handData, slot, dualWield, false);
             };
         }
 
         // First try full auto, then burst, then single fire
         return fullAutoShot(entityWrapper, weaponTitle, weaponStack, handData, slot, triggerType, dualWield)
-            || burstShot(entityWrapper, weaponTitle, weaponStack, handData, slot, dualWield)
-            || singleShot(entityWrapper, weaponTitle, weaponStack, handData, slot, dualWield, false);
+        || burstShot(entityWrapper, weaponTitle, weaponStack, handData, slot, dualWield)
+        || singleShot(entityWrapper, weaponTitle, weaponStack, handData, slot, dualWield, false);
     }
 
     private boolean singleShot(EntityWrapper entityWrapper, String weaponTitle, ItemStack weaponStack, HandData handData, EquipmentSlot slot, boolean dualWield, boolean isMelee)
@@ -545,8 +545,8 @@ public class ShootHandler implements IValidator, TriggerListener
 
         // If state is ready, check if this shot should not cause firearm actions
         if (state == FirearmState.READY
-            && (weaponHandler.getReloadHandler().getAmmoLeft(weaponStack, weaponTitle) % firearmAction.getFirearmActionFrequency() != 0
-            || !firearmAction.getFirearmType().hasShootActions()))
+        && (weaponHandler.getReloadHandler().getAmmoLeft(weaponStack, weaponTitle) % firearmAction.getFirearmActionFrequency() != 0
+        || !firearmAction.getFirearmType().hasShootActions()))
         {
             return;
         }
@@ -687,8 +687,8 @@ public class ShootHandler implements IValidator, TriggerListener
         }
 
         if (WeaponMechanics.getBasicConfigurations().getBool("Ignore_Other_Weapon_Ammo_When_Reloading_Empty_Weapon", false) || (slot == EquipmentSlot.HAND ?
-            reloadHandler.getAmmoLeft(entityWrapper.getEntity().getEquipment().getItemInOffHand(), null) == 0
-            : reloadHandler.getAmmoLeft(entityWrapper.getEntity().getEquipment().getItemInMainHand(), null) == 0))
+        reloadHandler.getAmmoLeft(entityWrapper.getEntity().getEquipment().getItemInOffHand(), null) == 0
+        : reloadHandler.getAmmoLeft(entityWrapper.getEntity().getEquipment().getItemInMainHand(), null) == 0))
         {
             // Now we know that both weapons are empty assuming the other weapon's ammo amount is already checked before this
 
@@ -789,8 +789,8 @@ public class ShootHandler implements IValidator, TriggerListener
             // i == prepareEvent.getProjectileAmount()
             // Change the spread after all pellets are shot
             Vector motion = spread != null
-                ? spread.getNormalizedSpreadDirection(entityWrapper, perProjectileShootLocation, mainHand, i == prepareEvent.getProjectileAmount() - 1 && updateSpreadChange, i, prepareEvent.getProjectileAmount()).multiply(prepareEvent.getProjectileSpeed())
-                : perProjectileShootLocation.getDirection().multiply(prepareEvent.getProjectileSpeed());
+            ? spread.getNormalizedSpreadDirection(entityWrapper, perProjectileShootLocation, mainHand, i == prepareEvent.getProjectileAmount() - 1 && updateSpreadChange, i, prepareEvent.getProjectileAmount()).multiply(prepareEvent.getProjectileSpeed())
+            : perProjectileShootLocation.getDirection().multiply(prepareEvent.getProjectileSpeed());
 
             if (recoil != null && i == 0 && livingEntity instanceof Player)
             {
@@ -919,7 +919,7 @@ public class ShootHandler implements IValidator, TriggerListener
     {
 
         if (Bukkit.getPluginManager().getPlugin("Vivecraft-Spigot-Extensions") != null
-            && livingEntity.getType() == EntityType.PLAYER)
+        && livingEntity.getType() == EntityType.PLAYER)
         {
             // Vivecraft support for VR players
 
@@ -1028,8 +1028,8 @@ public class ShootHandler implements IValidator, TriggerListener
             if (!invalidTrigger.isEmpty())
             {
                 throw data.exception("Trigger", "Full_Automatic cannot use the trigger: " + invalidTrigger,
-                    "Fully_Automatic can only use the following triggers:",
-                    "START_SNEAK, START_SPRINT, RIGHT_CLICK, START_SWIM, START_GLIDE, START_WALK, START_IN_MIDAIR and START_STAND.");
+                "Fully_Automatic can only use the following triggers:",
+                "START_SNEAK, START_SPRINT, RIGHT_CLICK, START_SWIM, START_GLIDE, START_WALK, START_IN_MIDAIR and START_STAND.");
             }
         }
 
@@ -1037,8 +1037,8 @@ public class ShootHandler implements IValidator, TriggerListener
         if (defaultSelectiveFire != null)
         {
             if (!defaultSelectiveFire.equalsIgnoreCase("SINGLE")
-                && !defaultSelectiveFire.equalsIgnoreCase("BURST")
-                && !defaultSelectiveFire.equalsIgnoreCase("AUTO"))
+            && !defaultSelectiveFire.equalsIgnoreCase("BURST")
+            && !defaultSelectiveFire.equalsIgnoreCase("AUTO"))
             {
 
                 throw new SerializerOptionsException(data.serializer, "Selective Fire Default", Arrays.asList("SINGLE", "BURST", "AUTO"), defaultSelectiveFire, data.of("Selective_Fire.Default").getLocation());
@@ -1058,8 +1058,8 @@ public class ShootHandler implements IValidator, TriggerListener
         return switch (triggerType)
         {
             case START_SNEAK, START_SPRINT, RIGHT_CLICK,
-                START_SWIM, START_GLIDE, START_WALK,
-                START_IN_MIDAIR, START_STAND -> false;
+            START_SWIM, START_GLIDE, START_WALK,
+            START_IN_MIDAIR, START_STAND -> false;
             default -> true;
         };
     }
