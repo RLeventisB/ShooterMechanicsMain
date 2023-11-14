@@ -22,7 +22,8 @@ import static me.deecaad.weaponmechanics.WeaponMechanics.debug;
  * is undefined, but every projectile is guaranteed to tick once for every MC
  * server tick.
  */
-public class ProjectilesRunnable extends BukkitRunnable {
+public class ProjectilesRunnable extends BukkitRunnable
+{
 
     private final LinkedList<AProjectile> projectiles;
     private final LinkedBlockingQueue<AProjectile> asyncProjectiles;
@@ -39,7 +40,8 @@ public class ProjectilesRunnable extends BukkitRunnable {
      *
      * @param plugin The non-null plugin
      */
-    public ProjectilesRunnable(Plugin plugin) {
+    public ProjectilesRunnable(Plugin plugin)
+    {
         projectiles = new LinkedList<>();
         asyncProjectiles = new LinkedBlockingQueue<>();
         managers = new LinkedList<>();
@@ -47,8 +49,14 @@ public class ProjectilesRunnable extends BukkitRunnable {
         runTaskTimer(plugin, 0, 0);
     }
 
-    public void addScriptManager(@NotNull ProjectileScriptManager manager) {
+    public void addScriptManager(@NotNull ProjectileScriptManager manager)
+    {
         managers.add(manager);
+    }
+
+    public void removeScriptManager(@NotNull ProjectileScriptManager manager)
+    {
+        managers.remove(manager);
     }
 
     /**
@@ -58,14 +66,15 @@ public class ProjectilesRunnable extends BukkitRunnable {
      *
      * @param projectile The non-null projectile to tick.
      */
-    public void addProjectile(@NotNull AProjectile projectile) {
-        if (projectile == null)
-            throw new IllegalArgumentException("Cannot add null projectile!");
+    public void addProjectile(@NotNull AProjectile projectile)
+    {
 
         if (projectile.isDead()) return;
 
-        projectile.onAdd();;
-        if (Bukkit.getServer().isPrimaryThread()) {
+        projectile.onAdd();
+        ;
+        if (Bukkit.getServer().isPrimaryThread())
+        {
             tickOnAdd(projectile);
             return;
         }
@@ -80,9 +89,12 @@ public class ProjectilesRunnable extends BukkitRunnable {
      *
      * @param projectiles The non-null collection of non-null projectiles.
      */
-    public void addProjectiles(Collection<? extends AProjectile> projectiles) {
-        if (Bukkit.getServer().isPrimaryThread()) {
-            for (AProjectile projectile : projectiles) {
+    public void addProjectiles(Collection<? extends AProjectile> projectiles)
+    {
+        if (Bukkit.getServer().isPrimaryThread())
+        {
+            for (AProjectile projectile : projectiles)
+            {
                 addProjectile(projectile);
             }
             return;
@@ -91,18 +103,24 @@ public class ProjectilesRunnable extends BukkitRunnable {
         asyncProjectiles.addAll(projectiles);
     }
 
-    private void tickOnAdd(@NotNull AProjectile projectile) {
-        for (ProjectileScriptManager manager : managers) {
+    private void tickOnAdd(@NotNull AProjectile projectile)
+    {
+        for (ProjectileScriptManager manager : managers)
+        {
             manager.attach(projectile);
         }
-        try {
-            if (projectile.tick()) {
+        try
+        {
+            if (projectile.tick())
+            {
 
                 // Call the remove method of projectile
                 projectile.remove();
                 return;
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             projectile.remove();
             debug.log(LogLevel.WARN, "Unhandled exception while ticking projectile! Removing projectile");
             debug.log(LogLevel.WARN, "Removed Projectile: " + projectile, e);
@@ -118,14 +136,16 @@ public class ProjectilesRunnable extends BukkitRunnable {
      * This method will always be run on the main server thread
      */
     @Override
-    public void run() {
+    public void run()
+    {
 
         // Extra check in case somebody runs this method by their own call.
         if (!Bukkit.getServer().isPrimaryThread())
             throw new IllegalStateException("Cannot tick projectiles asynchronously!");
 
         // Clears the async projectiles WHILE adding them to the normal projectiles
-        while (!asyncProjectiles.isEmpty()) {
+        while (!asyncProjectiles.isEmpty())
+        {
             AProjectile asyncProjectile = asyncProjectiles.remove();
             projectiles.add(asyncProjectile);
 
@@ -135,10 +155,13 @@ public class ProjectilesRunnable extends BukkitRunnable {
 
         Iterator<AProjectile> projectilesIterator = projectiles.iterator();
 
-        while (projectilesIterator.hasNext()) {
+        while (projectilesIterator.hasNext())
+        {
             AProjectile projectile = projectilesIterator.next();
-            try {
-                if (projectile.tick()) {
+            try
+            {
+                if (projectile.tick())
+                {
 
                     // Call the remove method of projectile
                     projectile.remove();
@@ -146,7 +169,9 @@ public class ProjectilesRunnable extends BukkitRunnable {
                     // Remove the projectile from runnable
                     projectilesIterator.remove();
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 projectilesIterator.remove();
                 debug.log(LogLevel.WARN, "Unhandled exception while ticking projectiles! Removing projectile");
                 debug.log(LogLevel.WARN, "Removed Projectile: " + projectile, e);

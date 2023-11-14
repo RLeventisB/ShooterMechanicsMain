@@ -208,7 +208,7 @@ public class DamageUtil
 
     /**
      * Mobs without spawn eggs didn't have statistics associated with them
-     * before 1.13. See https://bugs.mojang.com/browse/MC-33710.
+     * before 1.13. See <a href="https://bugs.mojang.com/browse/MC-33710">...</a>.
      *
      * @param type The entity type.
      * @return false if there is no statistic.

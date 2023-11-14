@@ -3,6 +3,7 @@ package me.deecaad.weaponmechanics.listeners;
 import me.deecaad.core.events.EntityEquipmentEvent;
 import me.deecaad.core.mechanics.CastData;
 import me.deecaad.core.mechanics.Mechanics;
+import me.deecaad.core.placeholder.PlaceholderMessage;
 import me.deecaad.weaponmechanics.WeaponMechanics;
 import me.deecaad.weaponmechanics.events.WeaponMechanicsEntityDamageByEntityEvent;
 import me.deecaad.weaponmechanics.utils.MetadataKey;
@@ -17,6 +18,7 @@ import me.deecaad.weaponmechanics.wrappers.EntityWrapper;
 import me.deecaad.weaponmechanics.wrappers.HandData;
 import me.deecaad.weaponmechanics.wrappers.PlayerWrapper;
 import me.deecaad.weaponmechanics.wrappers.StatsData;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -139,12 +141,24 @@ public class WeaponListeners implements Listener
     @EventHandler
     public void playerDeath(PlayerDeathEvent e)
     {
+        boolean hasDefaultDeathMessage = getBasicConfigurations().containsKey("Default_Death_Message");
         if (e.getEntity().getLastDamageCause() instanceof WeaponMechanicsEntityDamageByEntityEvent wmEvent)
         {
-            KillMessages messages = getConfigurations().getObject(wmEvent.weaponTitle + ".KillMessages", KillMessages.class);
+            KillMessages messages = getConfigurations().getObject(wmEvent.weaponTitle + ".Kill_Messages", KillMessages.class);
             if (messages != null)
             {
                 e.setDeathMessage(messages.getModifiedDeathText(e.getDeathMessage(), wmEvent.isExplosion, wmEvent.isHeadshot, wmEvent));
+                return;
+            }
+            if (hasDefaultDeathMessage)
+            {
+                String defaultDeathMessage = getBasicConfigurations().getString("Default_Death_Message");
+                if (defaultDeathMessage == null)
+                    return;
+                CastData cast = new CastData((LivingEntity) wmEvent.getDamager(), wmEvent.weaponTitle, wmEvent.itemStack);
+                cast.setTargetEntity((LivingEntity) wmEvent.getEntity());
+                cast.setTargetLocation(wmEvent.getEntity().getLocation());
+                e.setDeathMessage(LegacyComponentSerializer.legacySection().serialize(new PlaceholderMessage(defaultDeathMessage).replaceAndDeserialize(cast)));
             }
         }
     }

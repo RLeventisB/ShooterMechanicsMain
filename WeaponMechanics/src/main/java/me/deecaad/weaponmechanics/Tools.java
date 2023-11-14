@@ -2,21 +2,28 @@ package me.deecaad.weaponmechanics;
 
 import me.deecaad.core.utils.NumberUtil;
 import me.deecaad.core.utils.ReflectionUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.map.MinecraftFont;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import java.lang.reflect.Field;
 import java.util.LinkedList;
 
 import static me.deecaad.core.utils.StringUtil.LOWER_ALPHABET;
 
-public class Tools {
+public class Tools
+{
 
     private final Object a = "before a";
     private static final Object b = "before b";
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         //System.out.println(StringUtils.color("&#FFFFFF/&6test&#efefef&r"));
         //
 
@@ -44,7 +51,8 @@ public class Tools {
     }
 
     private static void calculateStats(double accuracy, double damage, double range,
-                                       double firerate, double mobility, double control) {
+                                       double firerate, double mobility, double control)
+    {
         // https://callofduty.fandom.com/wiki/Call_of_Duty:_Modern_Warfare_(2019)#Weapons
         // https://www.gamesatlas.com/cod-modern-warfare/weapons/
         System.out.println("Accuracy: ");
@@ -69,7 +77,8 @@ public class Tools {
         System.out.println("-> Slow firing: " + NumberUtil.lerp(15, 5, control));
     }
 
-    private static void reflectionsTest() {
+    private static void reflectionsTest()
+    {
         Tools tools = new Tools();
         Field aField = ReflectionUtil.getField(Tools.class, "a");
         System.out.println(ReflectionUtil.invokeField(aField, tools));
@@ -81,12 +90,39 @@ public class Tools {
         ReflectionUtil.setField(bField, null, "After a");
         System.out.println(ReflectionUtil.invokeField(aField, null));
     }
+    public static Team getTeam(Entity entity)
+    {
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+        if (entity instanceof Player player)
+        {
+            for (Team team : scoreboard.getTeams())
+            {
+                if (team.getEntries().contains(player.getName()))
+                {
+                    return team;
+                }
+            }
+        }
+        else
+        {
+            for (Team team : scoreboard.getTeams())
+            {
+                if (team.getEntries().contains(entity.getUniqueId().toString()))
+                {
+                    return team;
+                }
+            }
+        }
 
-    private static void entityHitBox() {
+        return null;
+    }
+    private static void entityHitBox()
+    {
         EntityType[] types = EntityType.values();
 
         System.out.println("Entity_Hitboxes:");
-        for (EntityType type : types) {
+        for (EntityType type : types)
+        {
             if (!type.isAlive()) continue; // If it can be a livingEntity, I think
             System.out.println("  " + type.name() + ":");
             System.out.println("    " + "Horizontal_Entity: false");
@@ -98,12 +134,14 @@ public class Tools {
         }
     }
 
-    private static void blockDamageData() {
+    private static void blockDamageData()
+    {
         System.out.println("\n\n\n\n");
 
         System.out.print("blocks = [");
 
-        for (Material mat : Material.values()) {
+        for (Material mat : Material.values())
+        {
             if (mat.isLegacy() || !mat.isBlock() || mat.isAir()) continue;
 
             System.out.print("(\"" + mat.name() + "\", " + mat.getBlastResistance() + ", " + mat.getHardness() + ")");
@@ -112,12 +150,14 @@ public class Tools {
         System.out.println("]\n\n\n\n");
     }
 
-    private static void fontData() {
+    private static void fontData()
+    {
         final String ALL_CHARS = " !\"#$%&'()*+,-./0123456789:;<=>?" +
                 "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_" +
                 "'abcdefghijklmnopqrstuvwxyz{|}~\u007F";
 
-        for (int i = 0; i < ALL_CHARS.length(); i++) {
+        for (int i = 0; i < ALL_CHARS.length(); i++)
+        {
             char c = ALL_CHARS.charAt(i);
 
             System.out.println(c + ": " + MinecraftFont.Font.getChar(c).getWidth());
@@ -128,7 +168,8 @@ public class Tools {
         System.out.println(MinecraftFont.Font.getWidth("================== WeaponMechanics =================="));
     }
 
-    private static int countDifferentCharacters(LinkedList<Character> characters) {
+    private static int countDifferentCharacters(LinkedList<Character> characters)
+    {
         int[] table = mapToCharTable(characters.toString());
         int count = 0;
         for (int i : table)
@@ -137,12 +178,17 @@ public class Tools {
         return count;
     }
 
-    private static int[] mapToCharTable(String str) {
+    private static int[] mapToCharTable(String str)
+    {
         int[] table = new int[LOWER_ALPHABET.length()];
-        for (int i = 0; i < str.length(); i++) {
-            try {
+        for (int i = 0; i < str.length(); i++)
+        {
+            try
+            {
                 table[Character.toLowerCase(str.charAt(i)) - 97]++;
-            } catch (ArrayIndexOutOfBoundsException ignore) {
+            }
+            catch (ArrayIndexOutOfBoundsException ignore)
+            {
                 // Sometimes a string will contain something like an underscore.
                 // We can safely ignore those characters and count the ones that
                 // matter.
